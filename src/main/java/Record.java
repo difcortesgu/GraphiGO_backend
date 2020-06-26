@@ -1,21 +1,13 @@
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Record {
 
-    public LinkedList<String> type;
+    public String type;
     public Object value;
     private ArrayList<Object> trace;
 
 
     public Record(String type, Object value) {
-        this.type = new LinkedList<>();
-        this.type.add(type);
-        this.value = value;
-        this.trace = new ArrayList<>();
-    }
-
-    public Record(LinkedList<String> type, Object value) {
         this.type = type;
         this.value = value;
         this.trace = new ArrayList<>();
@@ -27,12 +19,8 @@ public class Record {
         this.trace = new ArrayList<>();
     }
 
-    public LinkedList<String> getType() {
+    public String getType() {
         return type;
-    }
-
-    public void setType(LinkedList<String> type) {
-        this.type = type;
     }
 
     public Object getValue() {

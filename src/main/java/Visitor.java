@@ -1,3 +1,5 @@
+import com.google.gson.Gson;
+
 import java.util.*;
 
 public class Visitor extends ChocopyBaseVisitor<Record>{
@@ -20,27 +22,27 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
         // Check for operation compatibility
         try {
-            switch (r1.getType().getFirst()) {
+            switch (r1.getType()) {
                 case "int":
-                    if (!r2.getType().getFirst().equals("int"))
+                    if (!r2.getType().equals("int"))
                         throw new Exception();
                     if (op.equals("is"))
                         throw new Exception();
                     break;
                 case "bool":
-                    if (!r2.getType().getFirst().equals("bool"))
+                    if (!r2.getType().equals("bool"))
                         throw new Exception();
                     if (!op.equals("==") && !op.equals("!="))
                         throw new Exception();
                     break;
                 case "str":
-                    if (!r2.getType().getFirst().equals("str"))
+                    if (!r2.getType().equals("str"))
                         throw new Exception();
                     if (!op.equals("==") && !op.equals("!=") && !op.equals("+"))
                         throw new Exception();
                     break;
                 case "list":
-                    if (!r2.getType().getFirst().equals("list") && !op.equals("is"))
+                    if (!r2.getType().equals("list") && !op.equals("is"))
                         throw new Exception();
                     if (!op.equals("+") && !op.equals("is"))
                         throw new Exception();
@@ -51,7 +53,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     break;
             }
         }catch (Exception e){
-            System.err.println("La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType().getFirst()+" y "+r2.getType().getFirst());
+            System.err.println("La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
             System.exit(1);
         }
 //        if (r1.getValue().equals("None") || r2.getValue().equals("None")){
@@ -61,10 +63,10 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
         switch (op){
             case "+":
-                if (r1.getType().getFirst().equals("int")){
+                if (r1.getType().equals("int")){
                     return new Record("int", (Integer) r1.getValue() + (Integer) r2.getValue());
                 }
-                else if (r1.getType().getFirst().equals("str")){
+                else if (r1.getType().equals("str")){
                     return new Record("str", r1.getValue().toString() + r2.getValue().toString());
                 }
                 else{
@@ -93,7 +95,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 return new Record("int", (Integer) r1.getValue() % (Integer) r2.getValue());
             case "==":
                 // Esto puede fallar
-                return switch (r1.getType().getFirst()) {
+                return switch (r1.getType()) {
                     case "int" -> new Record("bool", ((Integer) r1.getValue()).equals((Integer) r2.getValue()));
                     // case "str" -> new Record("bool", r1.getValue().equals(r2.getValue()));
                     case "bool" -> new Record("bool", (boolean) r1.getValue() == (boolean) r2.getValue());
@@ -101,7 +103,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 };
             case "!=":
                 // Esto puede fallar
-                return switch (r1.getType().getFirst()) {
+                return switch (r1.getType()) {
                     case "int" -> new Record("bool", !((Integer) r1.getValue()).equals((Integer) r2.getValue()));
                     // case "str" -> new Record("bool", !(r1.getValue()).equals(r2.getValue()));
                     case "bool" -> new Record("bool", (boolean) r1.getValue() != (boolean) r2.getValue());
@@ -140,11 +142,11 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             }
         }
 
-        if (!r.getType().getFirst().equals("func") && !r.getType().getFirst().equals("class")){
+        if (!r.getType().equals("func") && !r.getType().equals("class")){
             System.err.println("La variable " + funcName + " no es una funcion ni una clase");
             System.exit(1);
         }
-        if (r.getType().getFirst().equals("class")){
+        if (r.getType().equals("class")){
             //Get the context of the function
             ChocopyParser.Class_defContext ctxClass = (ChocopyParser.Class_defContext) symbolTables.get("program").get(funcName).getValue();
             String id = UUID.randomUUID().toString();
@@ -179,12 +181,12 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 callStack.pop();
                 symbolTable = symbolTables.get(callStack.peek());
                 if (!callStack.peek().equals("program")){
-                    ctxClass = (ChocopyParser.Class_defContext) symbolTables.get("program").get(symbolTable.get("self").getType().getFirst()).getValue();
+                    ctxClass = (ChocopyParser.Class_defContext) symbolTables.get("program").get(symbolTable.get("self").getType()).getValue();
                 }
             }while(!callStack.peek().equals("program"));
 
             return new Record(funcName, id);
-        }else if (r.getType().getFirst().equals("func")){
+        }else if (r.getType().equals("func")){
             //Get the context of the function
             ChocopyParser.Func_defContext ctxFunc = (ChocopyParser.Func_defContext) r.getValue();
 
@@ -209,8 +211,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                         String aux = callStack.pop();
                         Record self = symbolTables.get(callStack.peek()).get("self");
                         callStack.push(aux);
-                        if (! self.getType().getFirst().equals(param.getType().getFirst())){
-                            System.err.println("El parametro "+ param.getValue() +" debe ser de tipo \""+ param.getType().getFirst() +"\" y se recibio \""+ self.getType().getFirst() +"\"");
+                        if (! self.getType().equals(param.getType())){
+                            System.err.println("El parametro "+ param.getValue() +" debe ser de tipo \""+ param.getType() +"\" y se recibio \""+ self.getType() +"\"");
                             System.exit(1);
                         }
                         symbolTable.put((String) param.getValue(), self);
@@ -222,8 +224,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                         callStack.push(aux);
                         symbolTable = symbolTables.get(callStack.peek());
                         //REVISAR
-                        if (! expr.getType().getFirst().equals(param.getType().getFirst())){
-                            System.err.println("El parametro "+ param.getValue() +" debe ser de tipo \""+ param.getType().getFirst() +"\" y se recibio \""+ expr.getType().getFirst() +"\"");
+                        if (! expr.getType().equals(param.getType())){
+                            System.err.println("El parametro "+ param.getValue() +" debe ser de tipo \""+ param.getType() +"\" y se recibio \""+ expr.getType() +"\"");
                             System.exit(1);
                         }
                         symbolTable.put((String) param.getValue(), expr);
@@ -245,8 +247,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             }
             if (ctxFunc.type() != null){
                 String type = (String) ((Record) visitType(ctxFunc.type())).getValue();
-                if (!func_body.getType().getFirst().equals(type) && !func_body.getType().getFirst().equals("None")){
-                    System.err.println("La funcion \""+funcName+"\" debe retornar el tipo \""+type+"\" y se encontro el tipo \""+func_body.getType().getFirst()+"\"");
+                if (!func_body.getType().equals(type) && !func_body.getType().equals("None")){
+                    System.err.println("La funcion \""+funcName+"\" debe retornar el tipo \""+type+"\" y se encontro el tipo \""+func_body.getType()+"\"");
                     System.exit(1);
                 }
             }
@@ -306,7 +308,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         do{
             parent = st.get("super");
             self = st.get("self");
-            if(r1.getType().getFirst().equals(self.getType().getFirst())){
+            if(r1.getType().equals(self.getType())){
                 return true;
             }
             st = symbolTables.get(parent.getValue());
@@ -319,7 +321,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if (callStack.size()<2) return false;
         String aux = callStack.pop();
         Hashtable<String, Record> st = symbolTables.get(callStack.peek());
-        if (st.get(".").getType().getFirst().equals("class")){
+        if (st.get(".").getType().equals("class")){
             callStack.push(aux);
             return true;
         }
@@ -329,16 +331,16 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
     //Checks if you've reached the class context
     public boolean isClass_(){
-        return !callStack.isEmpty() && symbolTables.get(callStack.peek()).get(".").getType().getFirst().equals("class");
+        return !callStack.isEmpty() && symbolTables.get(callStack.peek()).get(".").getType().equals("class");
     }
 
     //Checks if you've reached the top-level context
     public boolean isProgram(){
-        return !callStack.isEmpty() && symbolTables.get(callStack.peek()).get(".").getType().getFirst().equals("program");
+        return !callStack.isEmpty() && symbolTables.get(callStack.peek()).get(".").getType().equals("program");
     }
 
     public boolean isFunction(){
-        return !callStack.isEmpty() && symbolTables.get(callStack.peek()).get(".").getType().getFirst().equals("func");
+        return !callStack.isEmpty() && symbolTables.get(callStack.peek()).get(".").getType().equals("func");
     }
 
     @Override
@@ -381,11 +383,12 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
             Record r = (Record) visitExpr(ctx.expr());
             //puede fallar
-            if (r.getType().getFirst().equals("None")){
+            if (r.getType().equals("None")){
                 System.err.println("No se puede imprimir una variable de tipo \"None\"");
                 System.exit(1);
             }
-            System.out.println(r.getValue());
+            Gson gson = new Gson();
+            System.out.println(gson.toJson(r.getValue()));
             return null;
         }
         if(ctx.target() !=  null) {
@@ -407,7 +410,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                         case "id" -> temp = symbolTable.get(t.y);
                         case "index" -> {
                             assert temp != null;
-                            if (temp.getType().getFirst().equals("str")) {
+                            if (temp.getType().equals("str")) {
                                 change = false;
                                 temp.setValue(((String) temp.getValue()).replace(((String) temp.getValue()).charAt((Integer) t.y), ((String) r1.getValue()).charAt(0)));
                             }else{
@@ -421,9 +424,9 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     }
                 }
                 assert temp != null;
-                if(!temp.getType().getFirst().equals(r1.getType().getFirst()) && !r1.getType().getFirst().equals("None")){
-                    if(!symbolTables.get("program").containsKey(temp.getType().getFirst()) || !symbolTables.get("program").containsKey(r1.getType().getFirst()) || !inherits(temp, r1)){
-                        System.err.println("Los tipos de datos \"" + temp.getType().getFirst() + "\" y \"" + r1.getType().getFirst() + "\" no coinciden");
+                if(!temp.getType().equals(r1.getType()) && !r1.getType().equals("None")){
+                    if(!symbolTables.get("program").containsKey(temp.getType()) || !symbolTables.get("program").containsKey(r1.getType()) || !inherits(temp, r1)){
+                        System.err.println("Los tipos de datos \"" + temp.getType() + "\" y \"" + r1.getType() + "\" no coinciden");
                         System.exit(1);
                     }
                 }
@@ -448,8 +451,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if(ctx.IF() != null){
             //IF expr DOS_PUNTOS block (ELIF expr DOS_PUNTOS block )* (ELSE DOS_PUNTOS block)?
             Record r = (Record) visitExpr(ctx.expr(0));
-            if (!r.getType().getFirst().equals("bool")){
-                System.err.println("La comparacion solo es valida entre booleanos, se recibio: \""+r.getType().getFirst()+"\"");
+            if (!r.getType().equals("bool")){
+                System.err.println("La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
                 System.exit(1);
             }
             if((boolean) r.getValue()){
@@ -460,8 +463,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             if(ctx.ELIF() != null){
                 for (int i = 1; i < ctx.expr().size(); i++) {
                     r = (Record) visitExpr(ctx.expr(i));
-                    if (!r.getType().getFirst().equals("bool")){
-                        System.err.println("La comparacion solo es valida entre booleanos, se recibio: \""+r.getType().getFirst()+"\"");
+                    if (!r.getType().equals("bool")){
+                        System.err.println("La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
                         System.exit(1);
                     }
                     if((boolean) r.getValue()){
@@ -479,8 +482,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if(ctx.WHILE() != null){
             //WHILE expr DOS_PUNTOS block
             Record r = (Record) visitExpr(ctx.expr(0));
-            if (!r.getType().getFirst().equals("bool")){
-                System.err.println("La comparacion solo es valida entre booleanos, se recibio: \""+r.getType().getFirst()+"\"");
+            if (!r.getType().equals("bool")){
+                System.err.println("La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
                 System.exit(1);
             }
             while((boolean) r.getValue()){
@@ -492,15 +495,15 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if(ctx.FOR() != null){
             //FOR ID IN expr DOS_PUNTOS block;
             Record r = (Record) visitExpr(ctx.expr(0));
-            if (!r.getType().getFirst().equals("list") && !r.getType().getFirst().equals("str")){
-                System.err.println("Solo es posible iterar sobre listas o strings, se recibio: \""+r.getType().getFirst()+"\"");
+            if (!r.getType().equals("list") && !r.getType().equals("str")){
+                System.err.println("Solo es posible iterar sobre listas o strings, se recibio: \""+r.getType()+"\"");
                 System.exit(1);
             }
             if(!symbolTable.containsKey(ctx.ID().getText())) {
                 System.err.println("La variable " + ctx.ID().getText() + " ya fue declarada");
                 System.exit(1);
             }
-            if(r.getType().getFirst().equals("str")) {
+            if(r.getType().equals("str")) {
                 String values = (String) r.getValue();
                 for (int i = 0; i < values.length(); i++) {
                     Record id = symbolTable.get(ctx.ID().getText());
@@ -628,8 +631,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             Record r1 = (Record) visitExpr_or(ctx.expr_or(0));
             Record r2 = (Record) visitExpr_or(ctx.expr_or(1));
             Record r3 = (Record) visitExpr(ctx.expr());
-            if (!r2.getType().getFirst().equals("bool")){
-                System.err.println("La condicion debe ser de tipo booleano, se recibio: \""+r2.getType().getFirst()+"\"");
+            if (!r2.getType().equals("bool")){
+                System.err.println("La condicion debe ser de tipo booleano, se recibio: \""+r2.getType()+"\"");
                 System.exit(1);
             }
             if ((boolean) r2.getValue())
@@ -646,8 +649,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             // expr_and OR simple_expr
             Record r1 = (Record) visitExpr_or(ctx.expr_or());
             Record r2 = (Record) visitExpr_and(ctx.expr_and());
-            if (!r1.getType().getFirst().equals("bool") || !r2.getType().getFirst().equals("bool")){
-                System.err.println("La operacion or solo es valida en booleanos, se recibio: \""+r1.getType().getFirst()+"\", \""+r2.getType().getFirst()+"\"");
+            if (!r1.getType().equals("bool") || !r2.getType().equals("bool")){
+                System.err.println("La operacion or solo es valida en booleanos, se recibio: \""+r1.getType()+"\", \""+r2.getType()+"\"");
                 System.exit(1);
             }
             return new Record("bool", (boolean) r1.getValue() || (boolean) r2.getValue());
@@ -661,8 +664,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             // expr_and AND simple_expr
             Record r1 = (Record) visitExpr_and(ctx.expr_and());
             Record r2 = (Record) visitSimple_expr(ctx.simple_expr());
-            if (!r1.getType().getFirst().equals("bool") || !r2.getType().getFirst().equals("bool")){
-                System.err.println("La operacion and solo es valida en booleanos, se recibio: \""+r1.getType().getFirst()+"\", \""+r2.getType().getFirst()+"\"");
+            if (!r1.getType().equals("bool") || !r2.getType().equals("bool")){
+                System.err.println("La operacion and solo es valida en booleanos, se recibio: \""+r1.getType()+"\", \""+r2.getType()+"\"");
                 System.exit(1);
             }
             return new Record("bool", (boolean) r1.getValue() && (boolean) r2.getValue());
@@ -716,12 +719,12 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if(ctx.PUNTO() != null){
             Record r = (Record) visitSimple_value(ctx.simple_value());
 
-            if (!symbolTables.get("program").containsKey(r.getType().getFirst())){
-                System.err.println("No se encontro el tipo de dato \"" + r.getType().getFirst() + "\"");
+            if (!symbolTables.get("program").containsKey(r.getType())){
+                System.err.println("No se encontro el tipo de dato \"" + r.getType() + "\"");
                 System.exit(1);
             }
 
-            if (!symbolTables.get("program").get(r.getType().getFirst()).getType().getFirst().equals("class")) {
+            if (!symbolTables.get("program").get(r.getType()).getType().equals("class")) {
                 System.err.println("La expresion \"" + ctx.simple_value().getText() + "\" no retorna una clase");
                 System.exit(1);
             }
@@ -759,7 +762,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     System.exit(1);
                 }
             }
-            if (r.getType().getFirst().equals("func") || r.getType().getFirst().equals("class")){
+            if (r.getType().equals("func") || r.getType().equals("class")){
                 System.err.println(varName +" no una variable");
                 System.exit(1);
             }
@@ -771,11 +774,11 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if(ctx.COR_IZQ() != null){
             Record r = (Record) visitSimple_value(ctx.simple_value());
             Record i = (Record) visitExpr(ctx.expr());
-            if (!r.getType().getFirst().equals("list") && !r.getType().getFirst().equals("str")){
+            if (!r.getType().equals("list") && !r.getType().equals("str")){
                 System.err.println("La operacion [] no esta permitida para tipos de dato diferentes a \"str\", \"list\"");
                 System.exit(1);
             }
-            else if (!i.getType().getFirst().equals("int")){
+            else if (!i.getType().equals("int")){
                 System.err.println("El index debe ser de tipo \"int\"");
                 System.exit(1);
             }
@@ -784,9 +787,9 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 System.exit(1);
             }
             int len = 0;
-            if (r.getType().getFirst().equals("list"))
+            if (r.getType().equals("list"))
                 len = ((Object[]) r.getValue()).length;
-            else if (r.getType().getFirst().equals("str"))
+            else if (r.getType().equals("str"))
                 len = ((String) r.getValue()).length();
 
             if ((int) i.getValue() >= len){
@@ -794,12 +797,12 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 System.exit(1);
             }
             r.addTrace(new Tupla("index", i.getValue()));
-            if (r.getType().getFirst().equals("list")){
+            if (r.getType().equals("list")){
                 var r1 = (Record)((Object[]) r.getValue())[(Integer) i.getValue()];
                 r1.setTrace(r.getTrace());
                 return r1;
             }
-            if (r.getType().getFirst().equals("str")){
+            if (r.getType().equals("str")){
                 var r1 = new Record("str", ((String) r.getValue()).charAt((Integer) i.getValue()));
                 r1.setTrace(r.getTrace());
                 return r1;
@@ -817,8 +820,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if (ctx.NOT() !=  null){
             //NOT EXPR
             Record r = (Record) visitSimple_expr(ctx.simple_expr());
-            if (!r.getType().getFirst().equals("bool")){
-                System.err.println("La operacion not solo es valida en booleanos, se recibio: \""+r.getType().getFirst()+"\"");
+            if (!r.getType().equals("bool")){
+                System.err.println("La operacion not solo es valida en booleanos, se recibio: \""+r.getType()+"\"");
                 System.exit(1);
             }
             r.setValue(!(boolean)r.getValue());
@@ -836,12 +839,12 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
                 Record r = (Record) visitSimple_value(ctx.simple_value());
 
-                if (!symbolTables.get("program").containsKey(r.getType().getFirst())){
-                    System.err.println("No se encontro el tipo de dato \"" + r.getType().getFirst() + "\"");
+                if (!symbolTables.get("program").containsKey(r.getType())){
+                    System.err.println("No se encontro el tipo de dato \"" + r.getType() + "\"");
                     System.exit(1);
                 }
 
-                if (!symbolTables.get("program").get(r.getType().getFirst()).getType().getFirst().equals("class")) {
+                if (!symbolTables.get("program").get(r.getType()).getType().equals("class")) {
                     System.err.println("La expresion \"" + ctx.simple_value().getText() + "\" no retorna una clase");
                     System.exit(1);
                 }
@@ -892,7 +895,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     System.exit(1);
                 }
             }
-            if (r.getType().getFirst().equals("func") || r.getType().getFirst().equals("class")){
+            if (r.getType().equals("func") || r.getType().equals("class")){
                 System.err.println(varName +" no una variable");
                 System.exit(1);
             }
@@ -912,19 +915,19 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     System.err.println("La operacion [] no esta permitida para tipos de dato \"None\"");
                     System.exit(1);
                 }
-                if (!cexpr.getType().getFirst().equals("list") && !cexpr.getType().getFirst().equals("str")){
+                if (!cexpr.getType().equals("list") && !cexpr.getType().equals("str")){
                     System.err.println("La operacion [] no esta permitida para tipos de dato diferentes a \"str\", \"list\"");
                     System.exit(1);
                 }
                 Record expr = (Record) visitExpr(ctx.expr(0));
-                if (!expr.getType().getFirst().equals("int")){
+                if (!expr.getType().equals("int")){
                     System.err.println("El index debe ser de tipo \"int\"");
                     System.exit(1);
                 }
                 Integer len = 0;
-                if (cexpr.getType().getFirst().equals("list"))
+                if (cexpr.getType().equals("list"))
                     len = ((Object[]) cexpr.getValue()).length;
-                else if (cexpr.getType().getFirst().equals("str"))
+                else if (cexpr.getType().equals("str"))
                     len = ((String) cexpr.getValue()).length();
                 if ((int) expr.getValue() < 0 || (Integer) expr.getValue() >= len){
                     System.err.println("El index no se encuentra en el arreglo");
@@ -935,12 +938,12 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     System.exit(1);
                 }
                 cexpr.addTrace(new Tupla("index", expr.getValue()));
-                if (cexpr.getType().getFirst().equals("list")){
+                if (cexpr.getType().equals("list")){
                     var r = (Record)((Object[]) cexpr.getValue())[(Integer) expr.getValue()];
                     r.setTrace(cexpr.getTrace());
                     return r;
                 }
-                if (cexpr.getType().getFirst().equals("str")){
+                if (cexpr.getType().equals("str")){
                     var r = new Record("str", ((String) cexpr.getValue()).charAt((Integer) expr.getValue()));
                     r.setTrace(cexpr.getTrace());
                     return r;
@@ -962,15 +965,15 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if (ctx.LEN() !=  null){
             // LEN ( EXPR )
             Record r = (Record) visitExpr(ctx.expr(0));
-            if (!r.getType().getFirst().equals("str") && !r.getType().getFirst().equals("list")){
-                System.err.println("La expresion debe ser de tipo \"lista\" o \"str\", se recibio: \""+r.getType().getFirst()+"\"");
+            if (!r.getType().equals("str") && !r.getType().equals("list")){
+                System.err.println("La expresion debe ser de tipo \"lista\" o \"str\", se recibio: \""+r.getType()+"\"");
                 System.exit(1);
             }
             if (r.getValue().equals("None")){
                 System.err.println("La expresion debe ser de tipo \"lista\" o \"str\", se recibio: \""+r.getValue()+"\"");
                 System.exit(1);
             }
-            if (r.getType().getFirst().equals("str"))
+            if (r.getType().equals("str"))
                 return new Record("int", ((String)r.getValue()).length());
             else
                 return new Record("int", ((Object[])r.getValue()).length);
@@ -986,7 +989,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if (ctx.MENOS() != null){
             // - CEXPR
             Record cexpr = (Record) visitSimple_value(ctx.simple_value());
-            if (!cexpr.getType().getFirst().equals("int")){
+            if (!cexpr.getType().equals("int")){
                 System.err.println("La operacion - no esta permitida para tipos de dato diferentes a \"int\"");
                 System.exit(1);
             }
@@ -1073,8 +1076,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         Record literal = (Record)visitLiteral(ctx.literal());
         Record type = (Record) visitType(ctx.typed_var().type());
 
-        if (!literal.getType().getFirst().equals(type.getValue()) && !literal.getValue().equals("None")){
-            System.err.println("No se puede asignar un " + type.getValue() + " a una variable " + literal.getType().getFirst());
+        if (!literal.getType().equals(type.getValue()) && !literal.getValue().equals("None")){
+            System.err.println("No se puede asignar un " + type.getValue() + " a una variable " + literal.getType());
             System.exit(1);
         }
 
