@@ -1,4 +1,8 @@
-def a(x:int)->int:
-    print(x)
+def a()->str:
+    for y in [1,2,3,4]:
+        print(y)
+        if(y > 2):
+            return "funciona"
+    return "no funciona"
 
-a(2)
+print(a())
