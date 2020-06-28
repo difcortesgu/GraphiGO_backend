@@ -150,8 +150,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitProgram(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitProgram(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -253,8 +260,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitClass_def(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitClass_def(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -317,8 +331,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitClass_body(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitClass_body(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -385,8 +406,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitClass_body_def(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitClass_body_def(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -482,8 +510,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitFunc_def(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitFunc_def(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -599,8 +634,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitFunc_body(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitFunc_body(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -822,8 +864,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitGlobal_decl(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitGlobal_decl(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -870,8 +919,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitNonlocal_decl(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitNonlocal_decl(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -923,8 +979,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitVar_def(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitVar_def(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1002,8 +1065,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitStmt(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitStmt(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1216,8 +1286,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitSimple_stmt(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitSimple_stmt(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1340,8 +1417,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitBlock(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitBlock(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1467,8 +1551,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitExpr(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitExpr(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1536,8 +1627,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitExpr_or(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitExpr_or(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1620,8 +1718,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitExpr_and(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitExpr_and(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1704,8 +1809,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitSimple_expr(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitSimple_expr(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1782,8 +1894,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitCexpr(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitCexpr(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1868,8 +1987,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitCexpr_sum(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitCexpr_sum(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -1954,8 +2080,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitCexpr_mul(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitCexpr_mul(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -2056,8 +2189,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitSimple_value(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitSimple_value(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 
@@ -2490,8 +2630,15 @@ public class ChocopyParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ChocopyVisitor ) return ((ChocopyVisitor<? extends T>)visitor).visitTarget(this);
+			if ( visitor instanceof ChocopyVisitor ) {
+				try {
+					return ((ChocopyVisitor<? extends T>)visitor).visitTarget(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			else return visitor.visitChildren(this);
+			return null;
 		}
 	}
 

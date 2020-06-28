@@ -4,19 +4,15 @@ public class Record {
 
     public String type;
     public Object value;
-    private ArrayList<Object> trace;
-
 
     public Record(String type, Object value) {
         this.type = type;
         this.value = value;
-        this.trace = new ArrayList<>();
     }
 
     public Record(Record r) {
         this.type = r.getType();
         this.value = r.getValue();
-        this.trace = new ArrayList<>();
     }
 
     public String getType() {
@@ -31,15 +27,20 @@ public class Record {
         this.value = value;
     }
 
-    public ArrayList<Object> getTrace() {
-        return trace;
-    }
-
-    public void setTrace(ArrayList<Object> trace) {
-        this.trace = trace;
-    }
-
-    public void addTrace(Tupla member) {
-        this.trace.add(member);
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        if(this.type.equals("list")){
+            Object[] r = (Object[]) this.value;
+            s.append("[");
+            for (Object record : r) {
+                s.append(record.toString());
+                s.append(", ");
+            }
+            s.delete(s.length()-2,s.length());
+            s.append("]");
+            return s.toString();
+        }
+        return this.value.toString();
     }
 }

@@ -1,3 +1,3 @@
-a:[[int]] = None
-a = [[1,2,4],[2,5,7]]
+a:[str] = None
+a = ["a", 1, True, [1, 4, 8]]
 print(a)

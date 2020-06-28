@@ -1,14 +1,16 @@
-import com.google.gson.Gson;
-
 import java.util.*;
 
 public class Visitor extends ChocopyBaseVisitor<Record>{
 
+    ArrayList<HistoryPoint> history;
     Stack<String> callStack;
     Hashtable<String, Hashtable<String, Record>> symbolTables;
     Hashtable<String, Record> symbolTable;
+    ArrayList<String> outputs;
 
     public Visitor() {
+        history = new ArrayList<>();
+        outputs = new ArrayList<>();
         callStack = new Stack<>();
         symbolTables = new Hashtable<>();
         Hashtable<String, Record> program = new Hashtable<>();
@@ -18,48 +20,39 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         symbolTable.put(".", new Record("program", null));
     }
 
-    public Record evalOp( Record r1, Record r2, String op ){
+    public Record evalOp( Record r1, Record r2, String op, int lineNumber, int columnNumber) throws Exception {
 
         // Check for operation compatibility
-        try {
-            switch (r1.getType()) {
-                case "int":
-                    if (!r2.getType().equals("int"))
-                        throw new Exception();
-                    if (op.equals("is"))
-                        throw new Exception();
-                    break;
-                case "bool":
-                    if (!r2.getType().equals("bool"))
-                        throw new Exception();
-                    if (!op.equals("==") && !op.equals("!="))
-                        throw new Exception();
-                    break;
-                case "str":
-                    if (!r2.getType().equals("str"))
-                        throw new Exception();
-                    if (!op.equals("==") && !op.equals("!=") && !op.equals("+"))
-                        throw new Exception();
-                    break;
-                case "list":
-                    if (!r2.getType().equals("list") && !op.equals("is"))
-                        throw new Exception();
-                    if (!op.equals("+") && !op.equals("is"))
-                        throw new Exception();
-                    break;
-                default:
-                    if (!op.equals("is"))
-                        throw new Exception();
-                    break;
-            }
-        }catch (Exception e){
-            System.err.println("La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
-            System.exit(1);
+        switch (r1.getType()) {
+            case "int":
+                if (!r2.getType().equals("int"))
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+" La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
+                if (op.equals("is"))
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+"La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
+                break;
+            case "bool":
+                if (!r2.getType().equals("bool"))
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+"La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
+                if (!op.equals("==") && !op.equals("!="))
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+"La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
+                break;
+            case "str":
+                if (!r2.getType().equals("str"))
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+"La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
+                if (!op.equals("==") && !op.equals("!=") && !op.equals("+"))
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+"La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
+                break;
+            case "list":
+                if (!r2.getType().equals("list") && !op.equals("is"))
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+"La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
+                if (!op.equals("+") && !op.equals("is"))
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+"La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
+                break;
+            default:
+                if (!op.equals("is"))
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+"La operacion \""+op+"\" no esta permitida entre los tipos de datos "+r1.getType()+" y "+r2.getType());
+                break;
         }
-//        if (r1.getValue().equals("None") || r2.getValue().equals("None")){
-//            System.err.println("La operacion \""+op+"\" no esta permitida entre los tipos de datos \"None\"");
-//            System.exit(1);
-//        }
 
         switch (op){
             case "+":
@@ -83,14 +76,12 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 return new Record("int", (Integer) r1.getValue() * (Integer) r2.getValue());
             case "//":
                 if((int) r2.getValue() == 0){
-                    System.err.println("No esta permitida la division entre 0");
-                    System.exit(1);
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+" No esta permitida la division entre 0");
                 }
                 return new Record("int", ((Integer) r1.getValue() - ((Integer) r1.getValue() % (Integer) r2.getValue())) / (Integer) r2.getValue());
             case "%":
                 if((int) r2.getValue() == 0){
-                    System.err.println("No esta permitida la division entre 0");
-                    System.exit(1);
+                    throw new Exception("Linea: "+lineNumber+", Columna: "+columnNumber+" No esta permitida la division entre 0");
                 }
                 return new Record("int", (Integer) r1.getValue() % (Integer) r2.getValue());
             case "==":
@@ -123,28 +114,25 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         return null;
     }
 
-    public Record func_eval(String funcName, List<ChocopyParser.ExprContext> expr_ctx){
+    public Record func_eval(String funcName, List<ChocopyParser.ExprContext> expr_ctx, int lineNumber, int columnNumber) throws Exception {
         Record r;
         if ( isClass_() ){
             //IMPORTANTE: el ultimo valor del stack debe ser la instancia de la clase
             r = searchClassMember(funcName);
             if (r == null){
-                System.err.println("El metodo " + funcName + " no ha sido declarado");
-                System.exit(1);
+                throw new Exception("Linea "+lineNumber+", Columna"+columnNumber+" El metodo " + funcName + " no ha sido declarado");
             }
         }
         else{
             //IMPORTANTE: el ultimo valor del stack debe ser la instancia de la funcion anidada
             r = searchID(funcName);
             if (r == null){
-                System.err.println("La funcion " + funcName + " no ha sido declarada");
-                System.exit(1);
+                throw new Exception("Linea "+lineNumber+", Columna"+columnNumber+" La funcion " + funcName + " no ha sido declarada");
             }
         }
 
         if (!r.getType().equals("func") && !r.getType().equals("class")){
-            System.err.println("La variable " + funcName + " no es una funcion ni una clase");
-            System.exit(1);
+            throw new Exception("Linea "+lineNumber+", Columna"+columnNumber+" La variable " + funcName + " no es una funcion ni una clase");
         }
         if (r.getType().equals("class")){
             //Get the context of the function
@@ -176,7 +164,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             do{
                 visitClass_body(ctxClass.class_body());
                 if (symbolTable.containsKey("__init__")){
-                    func_eval("__init__", expr_ctx);
+                    func_eval("__init__", expr_ctx, ctxClass.start.getLine(), ctxClass.start.getCharPositionInLine());
                 }
                 callStack.pop();
                 symbolTable = symbolTables.get(callStack.peek());
@@ -199,8 +187,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
             // Check if the parameters match
             if (isMethod() && ctxFunc.typed_var().size() < 1) {
-                System.err.println("El parametro self es obligatorio");
-                System.exit(1);
+                throw new Exception("Linea "+lineNumber+", Columna"+ctxFunc.typed_var(ctxFunc.typed_var().size()).start.getCharPositionInLine()+" El parametro self es obligatorio");
             }
             for (int i = 0, j = 0; i < ctxFunc.typed_var().size(); i++){
                 // Inside of this function params must be declared in the symbol table
@@ -212,8 +199,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                         Record self = symbolTables.get(callStack.peek()).get("self");
                         callStack.push(aux);
                         if (! self.getType().equals(param.getType())){
-                            System.err.println("El parametro "+ param.getValue() +" debe ser de tipo \""+ param.getType() +"\" y se recibio \""+ self.getType() +"\"");
-                            System.exit(1);
+                            throw new Exception("Linea "+lineNumber+", Columna"+ctxFunc.typed_var(i).start.getCharPositionInLine()+" El parametro "+ param.getValue() +" debe ser de tipo \""+ param.getType() +"\" y se recibio \""+ self.getType() +"\"");
                         }
                         symbolTable.put((String) param.getValue(), self);
                     }
@@ -225,16 +211,15 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                         symbolTable = symbolTables.get(callStack.peek());
                         //REVISAR
                         if (! expr.getType().equals(param.getType())){
-                            System.err.println("El parametro "+ param.getValue() +" debe ser de tipo \""+ param.getType() +"\" y se recibio \""+ expr.getType() +"\"");
-                            System.exit(1);
+                            throw new Exception("Linea "+lineNumber+", Columna"+ctxFunc.typed_var(i).start.getCharPositionInLine()+" El parametro "+ param.getValue() +" debe ser de tipo \""+ param.getType() +"\" y se recibio \""+ expr.getType() +"\"");
                         }
                         symbolTable.put((String) param.getValue(), expr);
                         j++;
                     }
 
                 }catch (IndexOutOfBoundsException e){
-                    System.err.println("El numero de parametros no coincide");
-                    System.exit(1);
+                    System.err.println();
+                    throw new Exception("Linea "+lineNumber+", Columna"+ctxFunc.typed_var(ctxFunc.typed_var().size()).start.getCharPositionInLine()+" El numero de parametros no coincide");
                 }
             }
 
@@ -248,8 +233,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             if (ctxFunc.type() != null){
                 String type = (String) ((Record) visitType(ctxFunc.type())).getValue();
                 if (!func_body.getType().equals(type) && !func_body.getType().equals("None")){
-                    System.err.println("La funcion \""+funcName+"\" debe retornar el tipo \""+type+"\" y se encontro el tipo \""+func_body.getType()+"\"");
-                    System.exit(1);
+                    throw new Exception("Linea "+lineNumber+", Columna"+columnNumber+" La funcion \""+funcName+"\" debe retornar el tipo \""+type+"\" y se encontro el tipo \""+func_body.getType()+"\"");
                 }
             }
             // Set the scope to be outside of the function again
@@ -302,7 +286,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     public boolean inherits(Record r1, Record r2){
-        var st = symbolTables.get(r2.getValue());
+        var st = symbolTables.get((String)r2.getValue());
         Record parent;
         Record self;
         do{
@@ -311,7 +295,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             if(r1.getType().equals(self.getType())){
                 return true;
             }
-            st = symbolTables.get(parent.getValue());
+            st = symbolTables.get((String)parent.getValue());
         }while(!(parent.getValue()).equals("object"));
         return false;
     }
@@ -345,30 +329,38 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
     @Override
     public Record visitProgram(ChocopyParser.ProgramContext ctx) {
+        try {
 
-        if (!ctx.stmt().isEmpty()){
-            for (int i = 0; i < ctx.stmt().size(); i++) {
-                visitStmt(ctx.stmt(i));
+
+            if (!ctx.stmt().isEmpty()) {
+                for (int i = 0; i < ctx.stmt().size(); i++) {
+                    visitStmt(ctx.stmt(i));
+                }
+                return null;
             }
-            return null;
-        }
-        if (ctx.class_def() != null){
-            visitClass_def(ctx.class_def());
-            return visitProgram(ctx.program());
-        }
-        if (ctx.var_def() != null){
-            visitVar_def(ctx.var_def());
-            return visitProgram(ctx.program());
-        }
-        if (ctx.func_def() != null){
-            visitFunc_def(ctx.func_def());
-            return visitProgram(ctx.program());
+            if (ctx.class_def() != null) {
+                visitClass_def(ctx.class_def());
+                history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
+                return visitProgram(ctx.program());
+            }
+            if (ctx.var_def() != null) {
+                visitVar_def(ctx.var_def());
+                history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
+                return visitProgram(ctx.program());
+            }
+            if (ctx.func_def() != null) {
+                visitFunc_def(ctx.func_def());
+                history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
+                return visitProgram(ctx.program());
+            }
+        }catch (Exception e){
+            System.err.println(e.getMessage());
         }
         return null;
     }
 
     @Override
-    public Record visitSimple_stmt(ChocopyParser.Simple_stmtContext ctx) {
+    public Record visitSimple_stmt(ChocopyParser.Simple_stmtContext ctx) throws Exception {
         if(ctx.PASS() != null){
             //pass
             return null;
@@ -384,11 +376,10 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             Record r = (Record) visitExpr(ctx.expr());
             //puede fallar
             if (r.getType().equals("None")){
-                System.err.println("No se puede imprimir una variable de tipo \"None\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr().start.getCharPositionInLine()+" No se puede imprimir una variable de tipo \"None\"");
             }
-            Gson gson = new Gson();
-            System.out.println(gson.toJson(r.getValue()));
+            outputs.add(r.toString());
+            System.out.println(r.toString());
             return null;
         }
         if(ctx.target() !=  null) {
@@ -396,41 +387,13 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             Record r1 = (Record) visitExpr(ctx.expr());
             //itera sobre todos los target y dependiendo del tipo de "operacion" y cambia el valor anidado de la tabla de simbolos
             for (int i = 0; i < ctx.target().size(); i++) {
-                Record temp = null;
                 Record target = (Record) visitTarget(ctx.target(i));
-                if(target.getTrace().isEmpty()) {
-                    System.err.println("No se puede asignar un valor a un resultado anonimo");
-                    System.exit(1);
-                }
-                boolean change = true;
-                for (int j = 0; j < target.getTrace().size(); j++) {
-                    //revisar esto
-                    Tupla t = (Tupla) target.getTrace().get(j);
-                    switch (t.x) {
-                        case "id" -> temp = symbolTable.get(t.y);
-                        case "index" -> {
-                            assert temp != null;
-                            if (temp.getType().equals("str")) {
-                                change = false;
-                                temp.setValue(((String) temp.getValue()).replace(((String) temp.getValue()).charAt((Integer) t.y), ((String) r1.getValue()).charAt(0)));
-                            }else{
-                                temp = (Record) ((Object[]) temp.getValue())[(Integer) t.y];
-                            }
-                        }
-                        case "member" -> {
-                            assert temp != null;
-                            temp = symbolTables.get(temp.getValue()).get(t.y);
-                        }
+                if(!target.getType().equals(r1.getType()) && !r1.getType().equals("None")){
+                    if(!symbolTables.get("program").containsKey(target.getType()) || !symbolTables.get("program").containsKey(r1.getType()) || !inherits(target, r1)){
+                        throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.target(i).start.getCharPositionInLine()+" Los tipos de datos \"" + target.getType() + "\" y \"" + r1.getType() + "\" no coinciden");
                     }
                 }
-                assert temp != null;
-                if(!temp.getType().equals(r1.getType()) && !r1.getType().equals("None")){
-                    if(!symbolTables.get("program").containsKey(temp.getType()) || !symbolTables.get("program").containsKey(r1.getType()) || !inherits(temp, r1)){
-                        System.err.println("Los tipos de datos \"" + temp.getType() + "\" y \"" + r1.getType() + "\" no coinciden");
-                        System.exit(1);
-                    }
-                }
-                if(change) temp.setValue(r1.getValue());
+                target.setValue(r1.getValue());
             }
             return null;
         }
@@ -443,17 +406,18 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitStmt(ChocopyParser.StmtContext ctx) {
+    public Record visitStmt(ChocopyParser.StmtContext ctx) throws Exception {
         if(ctx.simple_stmt() != null){
             //simple_stmt NEWLINE
-            return visitSimple_stmt(ctx.simple_stmt());
+            Record r = visitSimple_stmt(ctx.simple_stmt());
+            history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
+            return r;
         }
         if(ctx.IF() != null){
             //IF expr DOS_PUNTOS block (ELIF expr DOS_PUNTOS block )* (ELSE DOS_PUNTOS block)?
             Record r = (Record) visitExpr(ctx.expr(0));
             if (!r.getType().equals("bool")){
-                System.err.println("La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr(0).start.getCharPositionInLine()+" La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
             }
             if((boolean) r.getValue()){
                 visitBlock(ctx.block(0));
@@ -464,8 +428,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 for (int i = 1; i < ctx.expr().size(); i++) {
                     r = (Record) visitExpr(ctx.expr(i));
                     if (!r.getType().equals("bool")){
-                        System.err.println("La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
-                        System.exit(1);
+                        throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr(i).start.getCharPositionInLine()+" La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
                     }
                     if((boolean) r.getValue()){
                         visitBlock(ctx.block(i));
@@ -483,8 +446,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             //WHILE expr DOS_PUNTOS block
             Record r = (Record) visitExpr(ctx.expr(0));
             if (!r.getType().equals("bool")){
-                System.err.println("La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr(0).start.getCharPositionInLine()+" La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
             }
             while((boolean) r.getValue()){
                 visitBlock(ctx.block(0));
@@ -496,12 +458,10 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             //FOR ID IN expr DOS_PUNTOS block;
             Record r = (Record) visitExpr(ctx.expr(0));
             if (!r.getType().equals("list") && !r.getType().equals("str")){
-                System.err.println("Solo es posible iterar sobre listas o strings, se recibio: \""+r.getType()+"\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr(0).start.getCharPositionInLine()+" Solo es posible iterar sobre listas o strings, se recibio: \""+r.getType()+"\"");
             }
             if(!symbolTable.containsKey(ctx.ID().getText())) {
-                System.err.println("La variable " + ctx.ID().getText() + " ya fue declarada");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La variable " + ctx.ID().getText() + " ya fue declarada");
             }
             if(r.getType().equals("str")) {
                 String values = (String) r.getValue();
@@ -527,7 +487,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitBlock(ChocopyParser.BlockContext ctx) {
+    public Record visitBlock(ChocopyParser.BlockContext ctx) throws Exception {
         for (int i = 0; i < ctx.stmt().size(); i++) {
             visitStmt(ctx.stmt(i));
         }
@@ -625,15 +585,14 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitExpr(ChocopyParser.ExprContext ctx) {
+    public Record visitExpr(ChocopyParser.ExprContext ctx) throws Exception {
         if (ctx.IF() !=  null){
             // EXPR_OR IF EXPR_OR ELSE EXPR
             Record r1 = (Record) visitExpr_or(ctx.expr_or(0));
             Record r2 = (Record) visitExpr_or(ctx.expr_or(1));
             Record r3 = (Record) visitExpr(ctx.expr());
             if (!r2.getType().equals("bool")){
-                System.err.println("La condicion debe ser de tipo booleano, se recibio: \""+r2.getType()+"\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr_or(1).start.getCharPositionInLine()+" La condicion debe ser de tipo booleano, se recibio: \""+r2.getType()+"\"");
             }
             if ((boolean) r2.getValue())
                 return r1;
@@ -644,14 +603,13 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitExpr_or(ChocopyParser.Expr_orContext ctx) {
+    public Record visitExpr_or(ChocopyParser.Expr_orContext ctx) throws Exception {
         if (ctx.OR() !=  null){
             // expr_and OR simple_expr
             Record r1 = (Record) visitExpr_or(ctx.expr_or());
             Record r2 = (Record) visitExpr_and(ctx.expr_and());
             if (!r1.getType().equals("bool") || !r2.getType().equals("bool")){
-                System.err.println("La operacion or solo es valida en booleanos, se recibio: \""+r1.getType()+"\", \""+r2.getType()+"\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La operacion or solo es valida en booleanos, se recibio: \""+r1.getType()+"\", \""+r2.getType()+"\"");
             }
             return new Record("bool", (boolean) r1.getValue() || (boolean) r2.getValue());
         }
@@ -659,14 +617,13 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitExpr_and(ChocopyParser.Expr_andContext ctx) {
+    public Record visitExpr_and(ChocopyParser.Expr_andContext ctx) throws Exception {
         if (ctx.AND() !=  null){
             // expr_and AND simple_expr
             Record r1 = (Record) visitExpr_and(ctx.expr_and());
             Record r2 = (Record) visitSimple_expr(ctx.simple_expr());
             if (!r1.getType().equals("bool") || !r2.getType().equals("bool")){
-                System.err.println("La operacion and solo es valida en booleanos, se recibio: \""+r1.getType()+"\", \""+r2.getType()+"\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La operacion and solo es valida en booleanos, se recibio: \""+r1.getType()+"\", \""+r2.getType()+"\"");
             }
             return new Record("bool", (boolean) r1.getValue() && (boolean) r2.getValue());
         }
@@ -674,75 +631,70 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitCexpr(ChocopyParser.CexprContext ctx) {
+    public Record visitCexpr(ChocopyParser.CexprContext ctx) throws Exception {
         if (ctx.cexpr() != null){
             //cexpr_sum op_suma cexpr_mul
             Record r1 = (Record) visitCexpr(ctx.cexpr());
             Record r2 = (Record) visitCexpr_sum(ctx.cexpr_sum());
             String op = (String) visitCmp(ctx.cmp()).getValue();
 
-            return evalOp(r1,r2,op);
+            return evalOp(r1,r2,op, ctx.start.getLine(), ctx.cmp().start.getCharPositionInLine());
         }
         //cexpr_mul
         return visitCexpr_sum(ctx.cexpr_sum());
     }
 
     @Override
-    public Record visitCexpr_sum(ChocopyParser.Cexpr_sumContext ctx) {
+    public Record visitCexpr_sum(ChocopyParser.Cexpr_sumContext ctx) throws Exception {
         if (ctx.cexpr_sum() != null){
             //cexpr_sum op_suma cexpr_mul
             Record r1 = (Record) visitCexpr_sum(ctx.cexpr_sum());
             Record r2 = (Record) visitCexpr_mul(ctx.cexpr_mul());
             String op = (String) visitOp_suma(ctx.op_suma()).getValue();
 
-            return evalOp(r1,r2,op);
+            return evalOp(r1,r2,op, ctx.start.getLine(), ctx.op_suma().start.getCharPositionInLine());
         }
         //cexpr_mul
         return visitCexpr_mul(ctx.cexpr_mul());
     }
 
     @Override
-    public Record visitCexpr_mul(ChocopyParser.Cexpr_mulContext ctx) {
+    public Record visitCexpr_mul(ChocopyParser.Cexpr_mulContext ctx) throws Exception {
         if (ctx.cexpr_mul() != null){
             //cexpr_mul op_mul simple_value
             Record r1 = (Record) visitCexpr_mul(ctx.cexpr_mul());
             Record r2 = (Record) visitSimple_value(ctx.simple_value());
             String op = (String) visitOp_mul(ctx.op_mul()).getValue();
-            return evalOp(r1,r2,op);
+            return evalOp(r1,r2,op, ctx.start.getLine(), ctx.op_mul().start.getCharPositionInLine());
         }
         //simple_value
         return visitSimple_value(ctx.simple_value());
     }
 
     @Override
-    public Record visitTarget(ChocopyParser.TargetContext ctx) {
+    public Record visitTarget(ChocopyParser.TargetContext ctx) throws Exception {
         if(ctx.PUNTO() != null){
             Record r = (Record) visitSimple_value(ctx.simple_value());
 
             if (!symbolTables.get("program").containsKey(r.getType())){
-                System.err.println("No se encontro el tipo de dato \"" + r.getType() + "\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" No se encontro el tipo de dato \"" + r.getType() + "\"");
             }
 
             if (!symbolTables.get("program").get(r.getType()).getType().equals("class")) {
-                System.err.println("La expresion \"" + ctx.simple_value().getText() + "\" no retorna una clase");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La expresion \"" + ctx.simple_value().getText() + "\" no retorna una clase");
             }
 
             callStack.push((String) r.getValue());
-            symbolTable = symbolTables.get(r.getValue());
+            symbolTable = symbolTables.get((String)r.getValue());
 
             // SIMPLE_VALUE . ID
 
             Record r2 = searchClassMember(ctx.ID().getText());
             if (r2 == null){
-                System.err.println("El atributo " + ctx.ID().getText() + " no ha sido declarado");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" El atributo " + ctx.ID().getText() + " no ha sido declarado");
             }
             callStack.pop();
             symbolTable = symbolTables.get(callStack.peek());
-            r2.setTrace(r.getTrace());
-            r2.addTrace(new Tupla("member", ctx.ID().getText()));
             return r2;
         }
         if(ctx.ID() !=  null){
@@ -751,40 +703,31 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             if ( isClass_() ){
                 r = searchClassMember(varName);
                 if (r == null){
-                    System.err.println("El atributo " + varName + " no ha sido declarado");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" El atributo " + varName + " no ha sido declarado");
                 }
             }
             else{
                 r = searchID(varName);
                 if (r == null){
-                    System.err.println("La variable " + varName + " no ha sido declarada");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La variable " + varName + " no ha sido declarada");
                 }
             }
             if (r.getType().equals("func") || r.getType().equals("class")){
-                System.err.println(varName +" no una variable");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" "+varName +" no una variable");
             }
-            var trace = new ArrayList<>();
-            trace.add(new Tupla("id",varName));
-            r.setTrace(trace);
             return r;
         }
         if(ctx.COR_IZQ() != null){
             Record r = (Record) visitSimple_value(ctx.simple_value());
             Record i = (Record) visitExpr(ctx.expr());
             if (!r.getType().equals("list") && !r.getType().equals("str")){
-                System.err.println("La operacion [] no esta permitida para tipos de dato diferentes a \"str\", \"list\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La operacion [] no esta permitida para tipos de dato diferentes a \"str\", \"list\"");
             }
             else if (!i.getType().equals("int")){
-                System.err.println("El index debe ser de tipo \"int\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr().start.getCharPositionInLine()+" El index debe ser de tipo \"int\"");
             }
             else if (r.getValue().equals("None")){
-                System.err.println("El índice no se encuentra en el arreglo");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr().start.getCharPositionInLine()+" El index no se encuentra en el arreglo");
             }
             int len = 0;
             if (r.getType().equals("list"))
@@ -793,26 +736,20 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 len = ((String) r.getValue()).length();
 
             if ((int) i.getValue() >= len){
-                System.err.println("El index no se encuentra en el arreglo");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr().start.getCharPositionInLine()+" El index no se encuentra en el arreglo");
             }
-            r.addTrace(new Tupla("index", i.getValue()));
             if (r.getType().equals("list")){
-                var r1 = (Record)((Object[]) r.getValue())[(Integer) i.getValue()];
-                r1.setTrace(r.getTrace());
-                return r1;
+                return (Record)((Object[]) r.getValue())[(Integer) i.getValue()];
             }
             if (r.getType().equals("str")){
-                var r1 = new Record("str", ((String) r.getValue()).charAt((Integer) i.getValue()));
-                r1.setTrace(r.getTrace());
-                return r1;
+                return new Record("str", ((String) r.getValue()).charAt((Integer) i.getValue()));
             }
         }
         return null;
     }
 
     @Override
-    public Record visitSimple_expr(ChocopyParser.Simple_exprContext ctx) {
+    public Record visitSimple_expr(ChocopyParser.Simple_exprContext ctx) throws Exception {
         if (ctx.cexpr() != null){
             //cexpr
             return visitCexpr(ctx.cexpr());
@@ -821,8 +758,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             //NOT EXPR
             Record r = (Record) visitSimple_expr(ctx.simple_expr());
             if (!r.getType().equals("bool")){
-                System.err.println("La operacion not solo es valida en booleanos, se recibio: \""+r.getType()+"\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La operacion not solo es valida en booleanos, se recibio: \""+r.getType()+"\"");
             }
             r.setValue(!(boolean)r.getValue());
             return r;
@@ -831,7 +767,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitSimple_value(ChocopyParser.Simple_valueContext ctx) {
+    public Record visitSimple_value(ChocopyParser.Simple_valueContext ctx) throws Exception {
 
         if (ctx.ID() !=  null){
 
@@ -840,20 +776,18 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 Record r = (Record) visitSimple_value(ctx.simple_value());
 
                 if (!symbolTables.get("program").containsKey(r.getType())){
-                    System.err.println("No se encontro el tipo de dato \"" + r.getType() + "\"");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" No se encontro el tipo de dato \"" + r.getType() + "\"");
                 }
 
                 if (!symbolTables.get("program").get(r.getType()).getType().equals("class")) {
-                    System.err.println("La expresion \"" + ctx.simple_value().getText() + "\" no retorna una clase");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La expresion \"" + ctx.simple_value().getText() + "\" no retorna una clase");
                 }
                 callStack.push((String) r.getValue());
-                symbolTable = symbolTables.get(r.getValue());
+                symbolTable = symbolTables.get((String)r.getValue());
 
                 if (ctx.PAR_IZQ() !=  null){
                     // SIMPLE_VALUE . ID ( EXPR ... )
-                    Record result = (Record) func_eval(ctx.ID().getText(), ctx.expr());
+                    Record result = (Record) func_eval(ctx.ID().getText(), ctx.expr(), ctx.start.getLine(), ctx.start.getCharPositionInLine());
                     callStack.pop();
                     symbolTable = symbolTables.get(callStack.peek());
                     return result;
@@ -863,19 +797,16 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
                 Record r2 = searchClassMember(ctx.ID().getText());
                 if (r2 == null){
-                    System.err.println("El atributo " + ctx.ID().getText() + " no ha sido declarado");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" El atributo " + ctx.ID().getText() + " no ha sido declarado");
                 }
                 callStack.pop();
                 symbolTable = symbolTables.get(callStack.peek());
-                r2.setTrace(r.getTrace());
-                r2.addTrace(new Tupla("member", ctx.ID().getText()));
                 return r2;
             }
 
             if (ctx.PAR_IZQ() !=  null){
                 // ID ( EXPR ... )
-                return func_eval(ctx.ID().getText(), ctx.expr());
+                return func_eval(ctx.ID().getText(), ctx.expr(), ctx.start.getLine(), ctx.start.getCharPositionInLine());
             }
 
             // ID
@@ -884,25 +815,18 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             if ( isClass_() ){
                 r = searchClassMember(varName);
                 if (r == null){
-                    System.err.println("El atributo " + varName + " no ha sido declarado");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" El atributo " + varName + " no ha sido declarado");
                 }
             }
             else{
                 r = searchID(varName);
                 if (r == null){
-                    System.err.println("La variable " + varName + " no ha sido declarada");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La variable " + varName + " no ha sido declarada");
                 }
             }
             if (r.getType().equals("func") || r.getType().equals("class")){
-                System.err.println(varName +" no una variable");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" "+varName +" no una variable");
             }
-
-            var trace = new ArrayList<>();
-            trace.add(new Tupla("id",varName));
-            r.setTrace(trace);
             return r;
         }
 
@@ -912,17 +836,14 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 // SIMPLE_VALUE [ EXPR ]
                 Record cexpr = (Record) visitSimple_value(ctx.simple_value());
                 if (cexpr.getValue().equals("None")){
-                    System.err.println("La operacion [] no esta permitida para tipos de dato \"None\"");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La operacion [] no esta permitida para tipos de dato \"None\"");
                 }
                 if (!cexpr.getType().equals("list") && !cexpr.getType().equals("str")){
-                    System.err.println("La operacion [] no esta permitida para tipos de dato diferentes a \"str\", \"list\"");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La operacion [] no esta permitida para tipos de dato diferentes a \"str\", \"list\"");
                 }
                 Record expr = (Record) visitExpr(ctx.expr(0));
                 if (!expr.getType().equals("int")){
-                    System.err.println("El index debe ser de tipo \"int\"");
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr(0).start.getCharPositionInLine()+" El index debe ser de tipo \"int\"");
                 }
                 Integer len = 0;
                 if (cexpr.getType().equals("list"))
@@ -930,23 +851,16 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 else if (cexpr.getType().equals("str"))
                     len = ((String) cexpr.getValue()).length();
                 if ((int) expr.getValue() < 0 || (Integer) expr.getValue() >= len){
-                    System.err.println("El index no se encuentra en el arreglo");
                     if (cexpr.getValue().equals("None")){
-                        System.err.println("El index no se encuentra en el arreglo");
-                        System.exit(1);
+                        throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" El index no se encuentra en el arreglo");
                     }
-                    System.exit(1);
+                    throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" El index no se encuentra en el arreglo");
                 }
-                cexpr.addTrace(new Tupla("index", expr.getValue()));
                 if (cexpr.getType().equals("list")){
-                    var r = (Record)((Object[]) cexpr.getValue())[(Integer) expr.getValue()];
-                    r.setTrace(cexpr.getTrace());
-                    return r;
+                    return (Record)((Object[]) cexpr.getValue())[(Integer) expr.getValue()];
                 }
                 if (cexpr.getType().equals("str")){
-                    var r = new Record("str", ((String) cexpr.getValue()).charAt((Integer) expr.getValue()));
-                    r.setTrace(cexpr.getTrace());
-                    return r;
+                    return new Record("str", ((String) cexpr.getValue()).charAt((Integer) expr.getValue()));
                 }
             }
             // [ EXPR ...]
@@ -966,12 +880,10 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             // LEN ( EXPR )
             Record r = (Record) visitExpr(ctx.expr(0));
             if (!r.getType().equals("str") && !r.getType().equals("list")){
-                System.err.println("La expresion debe ser de tipo \"lista\" o \"str\", se recibio: \""+r.getType()+"\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr(0).start.getCharPositionInLine()+" La expresion debe ser de tipo \"lista\" o \"str\", se recibio: \""+r.getType()+"\"");
             }
             if (r.getValue().equals("None")){
-                System.err.println("La expresion debe ser de tipo \"lista\" o \"str\", se recibio: \""+r.getValue()+"\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr(0).start.getCharPositionInLine()+" La expresion debe ser de tipo \"lista\" o \"str\", se recibio: \""+r.getType()+"\"");
             }
             if (r.getType().equals("str"))
                 return new Record("int", ((String)r.getValue()).length());
@@ -990,8 +902,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             // - CEXPR
             Record cexpr = (Record) visitSimple_value(ctx.simple_value());
             if (!cexpr.getType().equals("int")){
-                System.err.println("La operacion - no esta permitida para tipos de dato diferentes a \"int\"");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.expr(0).start.getCharPositionInLine()+" La operacion - no esta permitida para tipos de dato diferentes a \"int\"");
             }
             cexpr.setValue(- (Integer)cexpr.getValue());
             return cexpr;
@@ -1006,7 +917,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitFunc_body(ChocopyParser.Func_bodyContext ctx) {
+    public Record visitFunc_body(ChocopyParser.Func_bodyContext ctx) throws Exception {
         if (ctx.global_decl() != null){
             visitGlobal_decl(ctx.global_decl());
             return visitFunc_body(ctx.func_body());
@@ -1036,19 +947,17 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitFunc_def(ChocopyParser.Func_defContext ctx) {
+    public Record visitFunc_def(ChocopyParser.Func_defContext ctx) throws Exception {
         String funcName = ctx.ID().getText();
 
         if ( isClass_() ){
             if (searchClassMember(funcName) != null  && !funcName.equals("__init__")){
-                System.err.println("El metodo " + funcName + " ya fue declarado");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" El metodo " + funcName + " ya fue declarado");
             }
         }
         else{
             if (searchID(funcName) != null){
-                System.err.println("La funcion " + funcName + " ya fue declarada");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La funcion " + funcName + " ya fue declarada");
             }
         }
 
@@ -1058,18 +967,16 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitVar_def(ChocopyParser.Var_defContext ctx){
+    public Record visitVar_def(ChocopyParser.Var_defContext ctx) throws Exception {
         String varName = ctx.typed_var().ID().getText();
         if ( isClass_() ){
             if (searchClassMember(varName) != null){
-                System.err.println("El atributo " + varName + " ya fue declarado");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" El atributo " + varName + " ya fue declarado");
             }
         }
         else{
             if (searchID(varName) != null){
-                System.err.println("La variable " + varName + " ya fue declarada");
-                System.exit(1);
+                throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La variable " + varName + " ya fue declarada");
             }
         }
 
@@ -1077,8 +984,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         Record type = (Record) visitType(ctx.typed_var().type());
 
         if (!literal.getType().equals(type.getValue()) && !literal.getValue().equals("None")){
-            System.err.println("No se puede asignar un " + type.getValue() + " a una variable " + literal.getType());
-            System.exit(1);
+            throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" No se puede asignar un " + type.getValue() + " a una variable " + literal.getType());
         }
 
         Record var = new Record((String) type.getValue(), literal.getValue());
@@ -1087,7 +993,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitClass_body(ChocopyParser.Class_bodyContext ctx) {
+    public Record visitClass_body(ChocopyParser.Class_bodyContext ctx) throws Exception {
         if (ctx.PASS() != null){
             return null;
         }
@@ -1098,7 +1004,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitClass_body_def(ChocopyParser.Class_body_defContext ctx) {
+    public Record visitClass_body_def(ChocopyParser.Class_body_defContext ctx) throws Exception {
         if (ctx.var_def() != null){
             if (ctx.class_body_def() != null){
                 visitVar_def(ctx.var_def());
@@ -1117,17 +1023,16 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitClass_def(ChocopyParser.Class_defContext ctx) {
+    public Record visitClass_def(ChocopyParser.Class_defContext ctx) throws Exception {
         String className = ctx.ID(0).getText();
         String parentName = ctx.ID(1).getText();
 
         if (symbolTable.containsKey(className)){
-            System.err.println("La clase " + className + " ya fue definida");
-            System.exit(1);
+
+            throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La clase " + className + " ya fue definida");
         }
         if (!parentName.equals("object") && !symbolTable.containsKey(parentName)){
-            System.err.println("La clase " + parentName + " no ha sido definida");
-            System.exit(1);
+            throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La clase " + parentName + " no ha sido definida");
         }
         Record new_class = new Record("class", ctx);
         symbolTable.put(className, new_class);
@@ -1135,28 +1040,25 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     }
 
     @Override
-    public Record visitGlobal_decl(ChocopyParser.Global_declContext ctx) {
+    public Record visitGlobal_decl(ChocopyParser.Global_declContext ctx) throws Exception {
         Hashtable<String, Record> st = symbolTables.get("program");
 
         //search for id
         if (!st.containsKey(ctx.ID().getText())) {
-            System.err.println("La variable " + ctx.ID().getText() + " no ha sido declarada");
-            System.exit(1);
-            return null;
+            throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La variable " + ctx.ID().getText() + " no ha sido declarada");
         }
         symbolTable.put(ctx.ID().getText(),st.get(ctx.ID().getText()));
         return st.get(ctx.ID().getText());
     }
 
     @Override
-    public Record visitNonlocal_decl(ChocopyParser.Nonlocal_declContext ctx) {
+    public Record visitNonlocal_decl(ChocopyParser.Nonlocal_declContext ctx) throws Exception {
         String aux = callStack.pop();
         Hashtable<String, Record> st = symbolTables.get(callStack.peek());
 
         //search for id
         if (!st.containsKey(ctx.ID().getText())) {
-            System.err.println("La variable " + ctx.ID().getText() + " no ha sido declarada");
-            System.exit(1);
+            throw new Exception("Linea "+ctx.start.getLine()+", Columna"+ctx.start.getCharPositionInLine()+" La variable " + ctx.ID().getText() + " no ha sido declarada");
         }
         symbolTable.put(ctx.ID().getText(),st.get(ctx.ID().getText()));
         callStack.push(aux);

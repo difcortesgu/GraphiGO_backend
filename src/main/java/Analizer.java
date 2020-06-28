@@ -25,10 +25,10 @@ public class Analizer implements Route {
 
         //visit first node of the parse tree and return the result of the analysis
         Visitor loader = new Visitor();
-        System.out.println("entro");
+        System.out.println("entró");
         loader.visit(tree);
-        System.out.println("termino");
+        System.out.println("terminó");
         Gson gson = new Gson();
-        return gson.toJson(loader);
+        return gson.toJson(loader.history);
     }
 }

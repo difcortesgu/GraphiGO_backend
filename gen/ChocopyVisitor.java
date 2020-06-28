@@ -14,37 +14,37 @@ public interface ChocopyVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitProgram(ChocopyParser.ProgramContext ctx);
+	T visitProgram(ChocopyParser.ProgramContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#class_def}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitClass_def(ChocopyParser.Class_defContext ctx);
+	T visitClass_def(ChocopyParser.Class_defContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#class_body}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitClass_body(ChocopyParser.Class_bodyContext ctx);
+	T visitClass_body(ChocopyParser.Class_bodyContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#class_body_def}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitClass_body_def(ChocopyParser.Class_body_defContext ctx);
+	T visitClass_body_def(ChocopyParser.Class_body_defContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#func_def}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunc_def(ChocopyParser.Func_defContext ctx);
+	T visitFunc_def(ChocopyParser.Func_defContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#func_body}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunc_body(ChocopyParser.Func_bodyContext ctx);
+	T visitFunc_body(ChocopyParser.Func_bodyContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#typed_var}.
 	 * @param ctx the parse tree
@@ -62,25 +62,25 @@ public interface ChocopyVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGlobal_decl(ChocopyParser.Global_declContext ctx);
+	T visitGlobal_decl(ChocopyParser.Global_declContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#nonlocal_decl}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNonlocal_decl(ChocopyParser.Nonlocal_declContext ctx);
+	T visitNonlocal_decl(ChocopyParser.Nonlocal_declContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#var_def}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitVar_def(ChocopyParser.Var_defContext ctx);
+	T visitVar_def(ChocopyParser.Var_defContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStmt(ChocopyParser.StmtContext ctx);
+	T visitStmt(ChocopyParser.StmtContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#end_file}.
 	 * @param ctx the parse tree
@@ -92,13 +92,13 @@ public interface ChocopyVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSimple_stmt(ChocopyParser.Simple_stmtContext ctx);
+	T visitSimple_stmt(ChocopyParser.Simple_stmtContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#block}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBlock(ChocopyParser.BlockContext ctx);
+	T visitBlock(ChocopyParser.BlockContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#literal}.
 	 * @param ctx the parse tree
@@ -110,49 +110,49 @@ public interface ChocopyVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpr(ChocopyParser.ExprContext ctx);
+	T visitExpr(ChocopyParser.ExprContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#expr_or}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpr_or(ChocopyParser.Expr_orContext ctx);
+	T visitExpr_or(ChocopyParser.Expr_orContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#expr_and}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpr_and(ChocopyParser.Expr_andContext ctx);
+	T visitExpr_and(ChocopyParser.Expr_andContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#simple_expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSimple_expr(ChocopyParser.Simple_exprContext ctx);
+	T visitSimple_expr(ChocopyParser.Simple_exprContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#cexpr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCexpr(ChocopyParser.CexprContext ctx);
+	T visitCexpr(ChocopyParser.CexprContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#cexpr_sum}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCexpr_sum(ChocopyParser.Cexpr_sumContext ctx);
+	T visitCexpr_sum(ChocopyParser.Cexpr_sumContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#cexpr_mul}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCexpr_mul(ChocopyParser.Cexpr_mulContext ctx);
+	T visitCexpr_mul(ChocopyParser.Cexpr_mulContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#simple_value}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSimple_value(ChocopyParser.Simple_valueContext ctx);
+	T visitSimple_value(ChocopyParser.Simple_valueContext ctx) throws Exception;
 	/**
 	 * Visit a parse tree produced by {@link ChocopyParser#cmp}.
 	 * @param ctx the parse tree
@@ -176,5 +176,5 @@ public interface ChocopyVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTarget(ChocopyParser.TargetContext ctx);
+	T visitTarget(ChocopyParser.TargetContext ctx) throws Exception;
 }

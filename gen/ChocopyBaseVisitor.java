@@ -23,35 +23,35 @@ public class ChocopyBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitClass_def(ChocopyParser.Class_defContext ctx) { return visitChildren(ctx); }
+	@Override public T visitClass_def(ChocopyParser.Class_defContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitClass_body(ChocopyParser.Class_bodyContext ctx) { return visitChildren(ctx); }
+	@Override public T visitClass_body(ChocopyParser.Class_bodyContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitClass_body_def(ChocopyParser.Class_body_defContext ctx) { return visitChildren(ctx); }
+	@Override public T visitClass_body_def(ChocopyParser.Class_body_defContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitFunc_def(ChocopyParser.Func_defContext ctx) { return visitChildren(ctx); }
+	@Override public T visitFunc_def(ChocopyParser.Func_defContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitFunc_body(ChocopyParser.Func_bodyContext ctx) { return visitChildren(ctx); }
+	@Override public T visitFunc_body(ChocopyParser.Func_bodyContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -72,28 +72,28 @@ public class ChocopyBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitGlobal_decl(ChocopyParser.Global_declContext ctx) { return visitChildren(ctx); }
+	@Override public T visitGlobal_decl(ChocopyParser.Global_declContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitNonlocal_decl(ChocopyParser.Nonlocal_declContext ctx) { return visitChildren(ctx); }
+	@Override public T visitNonlocal_decl(ChocopyParser.Nonlocal_declContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitVar_def(ChocopyParser.Var_defContext ctx) { return visitChildren(ctx); }
+	@Override public T visitVar_def(ChocopyParser.Var_defContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStmt(ChocopyParser.StmtContext ctx) { return visitChildren(ctx); }
+	@Override public T visitStmt(ChocopyParser.StmtContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -107,14 +107,14 @@ public class ChocopyBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSimple_stmt(ChocopyParser.Simple_stmtContext ctx) { return visitChildren(ctx); }
+	@Override public T visitSimple_stmt(ChocopyParser.Simple_stmtContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBlock(ChocopyParser.BlockContext ctx) { return visitChildren(ctx); }
+	@Override public T visitBlock(ChocopyParser.BlockContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -128,56 +128,56 @@ public class ChocopyBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExpr(ChocopyParser.ExprContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExpr(ChocopyParser.ExprContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExpr_or(ChocopyParser.Expr_orContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExpr_or(ChocopyParser.Expr_orContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExpr_and(ChocopyParser.Expr_andContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExpr_and(ChocopyParser.Expr_andContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSimple_expr(ChocopyParser.Simple_exprContext ctx) { return visitChildren(ctx); }
+	@Override public T visitSimple_expr(ChocopyParser.Simple_exprContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCexpr(ChocopyParser.CexprContext ctx) { return visitChildren(ctx); }
+	@Override public T visitCexpr(ChocopyParser.CexprContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCexpr_sum(ChocopyParser.Cexpr_sumContext ctx) { return visitChildren(ctx); }
+	@Override public T visitCexpr_sum(ChocopyParser.Cexpr_sumContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCexpr_mul(ChocopyParser.Cexpr_mulContext ctx) { return visitChildren(ctx); }
+	@Override public T visitCexpr_mul(ChocopyParser.Cexpr_mulContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSimple_value(ChocopyParser.Simple_valueContext ctx) { return visitChildren(ctx); }
+	@Override public T visitSimple_value(ChocopyParser.Simple_valueContext ctx) throws Exception { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -205,5 +205,5 @@ public class ChocopyBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitTarget(ChocopyParser.TargetContext ctx) { return visitChildren(ctx); }
+	@Override public T visitTarget(ChocopyParser.TargetContext ctx) throws Exception { return visitChildren(ctx); }
 }
