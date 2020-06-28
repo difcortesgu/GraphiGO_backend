@@ -1,4 +1,3 @@
-import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 public class Visitor extends ChocopyBaseVisitor<Record>{
@@ -195,7 +194,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 // Inside of this function params must be declared in the symbol table
                 try {
 
-                    Record param = (Record) visitTyped_var(ctxFunc.typed_var(i));
+                    Record param = visitTyped_var(ctxFunc.typed_var(i));
                     if (isMethod() && param.getValue().equals("self")){
                         String aux = callStack.pop();
                         Record self = symbolTables.get(callStack.peek()).get("self");
@@ -208,7 +207,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     else{
                         String aux = callStack.pop();
                         symbolTable = symbolTables.get(callStack.peek());
-                        Record expr = (Record) visitExpr(expr_ctx.get(j));
+                        Record expr = visitExpr(expr_ctx.get(j));
                         callStack.push(aux);
                         symbolTable = symbolTables.get(callStack.peek());
                         //REVISAR
@@ -225,7 +224,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 }
             }
 
-            Record func_body =  (Record) visitFunc_body(ctxFunc.func_body());
+            Record func_body =  visitFunc_body(ctxFunc.func_body());
 
             if(func_body == null){
                 callStack.pop();
@@ -233,7 +232,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 return new Record("None", "None");
             }
             if (ctxFunc.type() != null){
-                String type = (String) ((Record) visitType(ctxFunc.type())).getValue();
+                String type = (String) (visitType(ctxFunc.type())).getValue();
                 if (!func_body.getType().equals(type) && !func_body.getType().equals("None")){
                     throw new Exception("Linea "+lineNumber+", Columna "+columnNumber+" La funcion \""+funcName+"\" debe retornar el tipo \""+type+"\" y se encontro el tipo \""+func_body.getType()+"\"");
                 }
@@ -334,7 +333,10 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         try {
             if (!ctx.stmt().isEmpty()) {
                 for (int i = 0; i < ctx.stmt().size(); i++) {
-                    visitStmt(ctx.stmt(i));
+                    Record r = visitStmt(ctx.stmt(i));
+                    if (r != null) {
+                        return r;
+                    }
                 }
                 return null;
             }
@@ -374,7 +376,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         }
         if(ctx.PRINT() != null){
 
-            Record r = (Record) visitExpr(ctx.expr());
+            Record r = visitExpr(ctx.expr());
             //puede fallar
             if (r.getType().equals("None") || r.getValue().equals("None")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.expr().start.getCharPositionInLine()+" No se puede imprimir una variable de tipo \"None\"");
@@ -385,10 +387,10 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         }
         if(ctx.target() !=  null) {
             //(target IGUAL)+ expr
-            Record r1 = (Record) visitExpr(ctx.expr());
+            Record r1 = visitExpr(ctx.expr());
             //itera sobre todos los target y dependiendo del tipo de "operacion" y cambia el valor anidado de la tabla de simbolos
             for (int i = 0; i < ctx.target().size(); i++) {
-                Record target = (Record) visitTarget(ctx.target(i));
+                Record target = visitTarget(ctx.target(i));
                 if(!target.getType().equals(r1.getType()) && !r1.getType().equals("None")){
                     if(!symbolTables.get("program").containsKey(target.getType()) || !symbolTables.get("program").containsKey(r1.getType()) || !inherits(target, r1)){
                         throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.target(i).start.getCharPositionInLine()+" Los tipos de datos \"" + target.getType() + "\" y \"" + r1.getType() + "\" no coinciden");
@@ -416,72 +418,82 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         }
         if(ctx.IF() != null){
             //IF expr DOS_PUNTOS block (ELIF expr DOS_PUNTOS block )* (ELSE DOS_PUNTOS block)?
-            Record r = (Record) visitExpr(ctx.expr(0));
+            Record r = visitExpr(ctx.expr(0));
             if (!r.getType().equals("bool")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.expr(0).start.getCharPositionInLine()+" La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
             }
             if((boolean) r.getValue()){
-                visitBlock(ctx.block(0));
-                return null;
+                return visitBlock(ctx.block(0));
             }
 
             if(ctx.ELIF() != null){
                 for (int i = 1; i < ctx.expr().size(); i++) {
-                    r = (Record) visitExpr(ctx.expr(i));
+                    r = visitExpr(ctx.expr(i));
                     if (!r.getType().equals("bool")){
                         throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.expr(i).start.getCharPositionInLine()+" La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
                     }
                     if((boolean) r.getValue()){
-                        visitBlock(ctx.block(i));
-                        return null;
+                        return visitBlock(ctx.block(i));
                     }
                 }
             }
             if(ctx.ELSE() != null){
-                visitBlock(ctx.block(ctx.expr().size()));
-                return null;
+                return visitBlock(ctx.block(ctx.expr().size()));
             }
             return null;
         }
         if(ctx.WHILE() != null){
             //WHILE expr DOS_PUNTOS block
-            Record r = (Record) visitExpr(ctx.expr(0));
+            Record r = visitExpr(ctx.expr(0));
             if (!r.getType().equals("bool")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.expr(0).start.getCharPositionInLine()+" La comparacion solo es valida entre booleanos, se recibio: \""+r.getType()+"\"");
             }
             while((boolean) r.getValue()){
-                visitBlock(ctx.block(0));
-                r = (Record) visitExpr(ctx.expr(0));
+                Record block_return = visitBlock(ctx.block(0));
+                if(block_return != null){
+                    return block_return;
+                }
+                r = visitExpr(ctx.expr(0));
             }
             return null;
         }
         if(ctx.FOR() != null){
             //FOR ID IN expr DOS_PUNTOS block;
-            Record r = (Record) visitExpr(ctx.expr(0));
+            Record r = visitExpr(ctx.expr(0));
             if (!r.getType().equals("list") && !r.getType().equals("str")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.expr(0).start.getCharPositionInLine()+" Solo es posible iterar sobre listas o strings, se recibio: \""+r.getType()+"\"");
             }
-            if(!symbolTable.containsKey(ctx.ID().getText())) {
+            if(symbolTable.containsKey(ctx.ID().getText())) {
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" La variable " + ctx.ID().getText() + " ya fue declarada");
             }
+            symbolTable.put(ctx.ID().getText(), new Record("None", "None"));
             if(r.getType().equals("str")) {
                 String values = (String) r.getValue();
                 for (int i = 0; i < values.length(); i++) {
                     Record id = symbolTable.get(ctx.ID().getText());
-                    char value =  values.charAt(i);
-                    id.setValue(value);
-                    visitBlock(ctx.block(0));
+                    id.setValue(values.charAt(i));
+                    id.setType("str");
+                    Record block_return = visitBlock(ctx.block(0));
+                    if(block_return != null){
+                        symbolTable.remove(ctx.ID().getText());
+                        return block_return;
+                    }
                 }
             }
             else {
-                Object[] values = (Object[]) r.getValue();
-                for (Object o : values) {
+                for (Object o : (Object[]) r.getValue()) {
                     Record id = symbolTable.get(ctx.ID().getText());
-                    Record value = (Record) o;
-                    id.setValue(value.getValue());
-                    visitBlock(ctx.block(0));
+                    id.setType(((Record) o).getType());
+                    id.setValue(((Record) o).getValue());
+                    Record block_return = visitBlock(ctx.block(0));
+                    if(block_return != null){
+                        symbolTable.remove(ctx.ID().getText());
+                        return block_return;
+                    }
+
                 }
             }
+            symbolTable.remove(ctx.ID().getText());
             return null;
         }
         return null;
@@ -490,7 +502,10 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     @Override
     public Record visitBlock(ChocopyParser.BlockContext ctx) throws Exception {
         for (int i = 0; i < ctx.stmt().size(); i++) {
-            visitStmt(ctx.stmt(i));
+            Record r = visitStmt(ctx.stmt(i));
+            if (r != null) {
+                return r;
+            }
         }
         return null;
     }
@@ -522,7 +537,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     @Override
     public Record visitTyped_var(ChocopyParser.Typed_varContext ctx){
         if (ctx.ID()!= null){
-            Record r = (Record) visitType(ctx.type());
+            Record r = visitType(ctx.type());
             if (!symbolTable.containsKey(ctx.ID().getText())){
                 return new Record((String) r.getValue(), ctx.ID().getText());
             }
@@ -589,9 +604,9 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     public Record visitExpr(ChocopyParser.ExprContext ctx) throws Exception {
         if (ctx.IF() !=  null){
             // EXPR_OR IF EXPR_OR ELSE EXPR
-            Record r1 = (Record) visitExpr_or(ctx.expr_or(0));
-            Record r2 = (Record) visitExpr_or(ctx.expr_or(1));
-            Record r3 = (Record) visitExpr(ctx.expr());
+            Record r1 = visitExpr_or(ctx.expr_or(0));
+            Record r2 = visitExpr_or(ctx.expr_or(1));
+            Record r3 = visitExpr(ctx.expr());
             if (!r2.getType().equals("bool")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.expr_or(1).start.getCharPositionInLine()+" La condicion debe ser de tipo booleano, se recibio: \""+r2.getType()+"\"");
             }
@@ -607,8 +622,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     public Record visitExpr_or(ChocopyParser.Expr_orContext ctx) throws Exception {
         if (ctx.OR() !=  null){
             // expr_and OR simple_expr
-            Record r1 = (Record) visitExpr_or(ctx.expr_or());
-            Record r2 = (Record) visitExpr_and(ctx.expr_and());
+            Record r1 = visitExpr_or(ctx.expr_or());
+            Record r2 = visitExpr_and(ctx.expr_and());
             if (!r1.getType().equals("bool") || !r2.getType().equals("bool")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" La operacion or solo es valida en booleanos, se recibio: \""+r1.getType()+"\", \""+r2.getType()+"\"");
             }
@@ -621,8 +636,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     public Record visitExpr_and(ChocopyParser.Expr_andContext ctx) throws Exception {
         if (ctx.AND() !=  null){
             // expr_and AND simple_expr
-            Record r1 = (Record) visitExpr_and(ctx.expr_and());
-            Record r2 = (Record) visitSimple_expr(ctx.simple_expr());
+            Record r1 = visitExpr_and(ctx.expr_and());
+            Record r2 = visitSimple_expr(ctx.simple_expr());
             if (!r1.getType().equals("bool") || !r2.getType().equals("bool")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" La operacion and solo es valida en booleanos, se recibio: \""+r1.getType()+"\", \""+r2.getType()+"\"");
             }
@@ -635,8 +650,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     public Record visitCexpr(ChocopyParser.CexprContext ctx) throws Exception {
         if (ctx.cexpr() != null){
             //cexpr_sum op_suma cexpr_mul
-            Record r1 = (Record) visitCexpr(ctx.cexpr());
-            Record r2 = (Record) visitCexpr_sum(ctx.cexpr_sum());
+            Record r1 = visitCexpr(ctx.cexpr());
+            Record r2 = visitCexpr_sum(ctx.cexpr_sum());
             String op = (String) visitCmp(ctx.cmp()).getValue();
 
             return evalOp(r1,r2,op, ctx.start.getLine(), ctx.cmp().start.getCharPositionInLine());
@@ -649,8 +664,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     public Record visitCexpr_sum(ChocopyParser.Cexpr_sumContext ctx) throws Exception {
         if (ctx.cexpr_sum() != null){
             //cexpr_sum op_suma cexpr_mul
-            Record r1 = (Record) visitCexpr_sum(ctx.cexpr_sum());
-            Record r2 = (Record) visitCexpr_mul(ctx.cexpr_mul());
+            Record r1 = visitCexpr_sum(ctx.cexpr_sum());
+            Record r2 = visitCexpr_mul(ctx.cexpr_mul());
             String op = (String) visitOp_suma(ctx.op_suma()).getValue();
 
             return evalOp(r1,r2,op, ctx.start.getLine(), ctx.op_suma().start.getCharPositionInLine());
@@ -663,8 +678,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     public Record visitCexpr_mul(ChocopyParser.Cexpr_mulContext ctx) throws Exception {
         if (ctx.cexpr_mul() != null){
             //cexpr_mul op_mul simple_value
-            Record r1 = (Record) visitCexpr_mul(ctx.cexpr_mul());
-            Record r2 = (Record) visitSimple_value(ctx.simple_value());
+            Record r1 = visitCexpr_mul(ctx.cexpr_mul());
+            Record r2 = visitSimple_value(ctx.simple_value());
             String op = (String) visitOp_mul(ctx.op_mul()).getValue();
             return evalOp(r1,r2,op, ctx.start.getLine(), ctx.op_mul().start.getCharPositionInLine());
         }
@@ -675,7 +690,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     @Override
     public Record visitTarget(ChocopyParser.TargetContext ctx) throws Exception {
         if(ctx.PUNTO() != null){
-            Record r = (Record) visitSimple_value(ctx.simple_value());
+            Record r = visitSimple_value(ctx.simple_value());
 
             if (!symbolTables.get("program").containsKey(r.getType())){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" No se encontro el tipo de dato \"" + r.getType() + "\"");
@@ -719,8 +734,8 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             return r;
         }
         if(ctx.COR_IZQ() != null){
-            Record r = (Record) visitSimple_value(ctx.simple_value());
-            Record i = (Record) visitExpr(ctx.expr());
+            Record r = visitSimple_value(ctx.simple_value());
+            Record i = visitExpr(ctx.expr());
             if (!r.getType().equals("list") && !r.getType().equals("str")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" La operacion [] no esta permitida para tipos de dato diferentes a \"str\", \"list\"");
             }
@@ -757,7 +772,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         }
         if (ctx.NOT() !=  null){
             //NOT EXPR
-            Record r = (Record) visitSimple_expr(ctx.simple_expr());
+            Record r = visitSimple_expr(ctx.simple_expr());
             if (!r.getType().equals("bool")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" La operacion not solo es valida en booleanos, se recibio: \""+r.getType()+"\"");
             }
@@ -774,7 +789,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
             if (ctx.PUNTO() !=  null){
 
-                Record r = (Record) visitSimple_value(ctx.simple_value());
+                Record r = visitSimple_value(ctx.simple_value());
 
                 if (!symbolTables.get("program").containsKey(r.getType())){
                     throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" No se encontro el tipo de dato \"" + r.getType() + "\"");
@@ -835,14 +850,14 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
             if (ctx.simple_value() !=  null){
                 // SIMPLE_VALUE [ EXPR ]
-                Record cexpr = (Record) visitSimple_value(ctx.simple_value());
+                Record cexpr = visitSimple_value(ctx.simple_value());
                 if (cexpr.getValue().equals("None")){
                     throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" La operacion [] no esta permitida para tipos de dato \"None\"");
                 }
                 if (!cexpr.getType().equals("list") && !cexpr.getType().equals("str")){
                     throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" La operacion [] no esta permitida para tipos de dato diferentes a \"str\", \"list\"");
                 }
-                Record expr = (Record) visitExpr(ctx.expr(0));
+                Record expr = visitExpr(ctx.expr(0));
                 if (!expr.getType().equals("int")){
                     throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.expr(0).start.getCharPositionInLine()+" El index debe ser de tipo \"int\"");
                 }
@@ -879,7 +894,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
         if (ctx.LEN() !=  null){
             // LEN ( EXPR )
-            Record r = (Record) visitExpr(ctx.expr(0));
+            Record r = visitExpr(ctx.expr(0));
             if (!r.getType().equals("str") && !r.getType().equals("list")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.expr(0).start.getCharPositionInLine()+" La expresion debe ser de tipo \"lista\" o \"str\", se recibio: \""+r.getType()+"\"");
             }
@@ -901,7 +916,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
         if (ctx.MENOS() != null){
             // - CEXPR
-            Record cexpr = (Record) visitSimple_value(ctx.simple_value());
+            Record cexpr = visitSimple_value(ctx.simple_value());
             if (!cexpr.getType().equals("int")){
                 throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.expr(0).start.getCharPositionInLine()+" La operacion - no esta permitida para tipos de dato diferentes a \"int\"");
             }
@@ -937,7 +952,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         }
         if (!ctx.stmt().isEmpty()){
             for (int i = 0; i < ctx.stmt().size(); i++) {
-                Record r = (Record) visitStmt(ctx.stmt(i));
+                Record r = visitStmt(ctx.stmt(i));
                 if (r != null) {
                     return r;
                 }
@@ -982,7 +997,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         }
 
         Record literal = (Record)visitLiteral(ctx.literal());
-        Record type = (Record) visitType(ctx.typed_var().type());
+        Record type = visitType(ctx.typed_var().type());
 
         if (!literal.getType().equals(type.getValue()) && !literal.getValue().equals("None")){
             throw new Exception("Linea "+ctx.start.getLine()+", Columna "+ctx.start.getCharPositionInLine()+" No se puede asignar un " + type.getValue() + " a una variable " + literal.getType());

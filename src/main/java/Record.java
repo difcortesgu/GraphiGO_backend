@@ -17,6 +17,10 @@ public class Record{
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public Object getValue() {
         return value;
     }

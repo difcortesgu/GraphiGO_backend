@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.Stack;
 
 public class HistoryPoint {
@@ -21,7 +20,11 @@ public class HistoryPoint {
             Hashtable<String, Record> hs = new Hashtable<>();
             this.symbolTables.put(s, hs);
             stringRecordHashtable.forEach((s1, record) -> {
-                hs.put(s1, new Record(record));
+                Record r = new Record(record);
+                if(r.getType().equals("func") || r.getType().equals("class")){
+                    r.setValue(null);
+                }
+                hs.put(s1, new Record(r));
             });
         });
 
