@@ -27,7 +27,7 @@ public class HistoryPoint {
 
         this.outputs = new ArrayList<>();
         this.outputs.addAll(outputs);
-        
+
         this.lineNumber = lineNumber;
     }
 }

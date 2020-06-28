@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-
-public class Record {
+public class Record{
 
     public String type;
     public Object value;
