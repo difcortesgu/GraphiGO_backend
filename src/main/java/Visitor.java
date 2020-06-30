@@ -23,7 +23,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         symbolTables.put("program", program);
         callStack.push("program");
         symbolTable = symbolTables.get(callStack.peek());
-        symbolTable.put(".", new Record("program", null));
+        symbolTable.put(".", new Record("program", "program"));
         history.add(new HistoryPoint(callStack, symbolTables, outputs, 0));
     }
 
@@ -158,7 +158,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             do{
                 symbolTable = symbolTables.get(callStack.peek());
                 parent = ctxClass.ID(1).getText();
-                symbolTable.put(".", new Record("class", null));
+                symbolTable.put(".", new Record("class", ctxClass.ID(0).getText()));
                 symbolTable.put("self", new Record(ctxClass.ID(0).getText(), id1));
                 if(!parent.equals("object")){
                     id1 = UUID.randomUUID().toString();
@@ -194,7 +194,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             callStack.push(id.toString());
             symbolTables.put(id.toString(), new Hashtable<>());
             symbolTable = symbolTables.get(callStack.peek());
-            symbolTable.put(".", new Record("func", null));
+            symbolTable.put(".", new Record("func", funcName));
 
             // Check if the parameters match
             if (isMethod() && ctxFunc.typed_var().size() < 1) {
