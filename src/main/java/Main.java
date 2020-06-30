@@ -1,7 +1,3 @@
-import spark.Request;
-import spark.Response;
-import spark.Route;
-
 import static spark.Spark.*;
 
 public class Main {
@@ -9,11 +5,7 @@ public class Main {
 
         enableCORS();
 
-        get("/hello", new Route() {
-            public Object handle(Request req, Response res) throws Exception {
-                return "Hello World";
-            }
-        });
+        get("/hello", (req, res) -> "Hello World");
 
         post("/analize", new Analizer());
     }

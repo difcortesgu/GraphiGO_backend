@@ -2,6 +2,7 @@ import com.google.gson.Gson;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.io.IOUtils;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -10,7 +11,9 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Analizer implements Route {
 
@@ -26,10 +29,11 @@ public class Analizer implements Route {
         Part filePart = request.raw().getPart("myfile");
 
 
-        String inputString = request.queryParams("input");
+        Part inputPart = request.raw().getPart("input");
         String[] input;
-        if(inputString != null){
-            input = inputString.split("\n");
+        if(inputPart != null){
+            Object[] aux = IOUtils.readLines(inputPart.getInputStream(), StandardCharsets.UTF_8).toArray();
+            input = Arrays.copyOf(aux, aux.length, String[].class);
         }else{
             input = new String[0];
         }

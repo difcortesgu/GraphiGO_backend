@@ -1,7 +1,6 @@
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
-import java.util.concurrent.*;
 
 public class Visitor extends ChocopyBaseVisitor<Record>{
 
@@ -425,8 +424,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     public Record visitStmt(ChocopyParser.StmtContext ctx) throws Exception {
         if(ctx.simple_stmt() != null){
             //simple_stmt NEWLINE
-            Record r = visitSimple_stmt(ctx.simple_stmt());
-            return r;
+            return visitSimple_stmt(ctx.simple_stmt());
         }
         if(ctx.IF() != null){
             //IF expr DOS_PUNTOS block (ELIF expr DOS_PUNTOS block )* (ELSE DOS_PUNTOS block)?
