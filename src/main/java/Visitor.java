@@ -26,7 +26,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     public Record evalOp( Record r1, Record r2, String op, int lineNumber, int columnNumber) throws Exception {
 
         // Check for operation compatibility
-        if(r1.getType().equals("None") || r2.getType().equals("None") || r1.getValue().equals("None") || r2.getValue().equals("None") ){
+        if(r1.getValue().equals("None") ^ r2.getValue().equals("None") ){
             throw new Exception("Linea: "+lineNumber+":"+columnNumber+" No son validas las operaciones con \"None\"");
         }
 
@@ -217,7 +217,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                         callStack.push(aux);
                         symbolTable = symbolTables.get(callStack.peek());
                         //REVISAR
-                        if (! expr.getType().equals(param.getType())){
+                        if (!expr.getType().equals(param.getType()) && !param.getType().equals("object")){
                             throw new Exception("Linea "+lineNumber+":"+ctxFunc.typed_var(i).start.getCharPositionInLine()+" El parametro "+ param.getValue() +" debe ser de tipo \""+ param.getType() +"\" y se recibio \""+ expr.getType() +"\"");
                         }
                         symbolTable.put((String) param.getValue(), expr);
