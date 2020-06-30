@@ -424,6 +424,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if(ctx.IF() != null){
             //IF expr DOS_PUNTOS block (ELIF expr DOS_PUNTOS block )* (ELSE DOS_PUNTOS block)?
             Record r = visitExpr(ctx.expr(0));
+            history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
             if (!r.getType().equals("bool")){
                 throw new Exception("Linea "+ctx.start.getLine()+":"+ctx.expr(0).start.getCharPositionInLine()+" La comparacion solo es valida entre booleanos, se recibio:\""+r.getType()+"\"");
             }
@@ -434,6 +435,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             if(ctx.ELIF() != null){
                 for (int i = 1; i < ctx.expr().size(); i++) {
                     r = visitExpr(ctx.expr(i));
+                    history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
                     if (!r.getType().equals("bool")){
                         throw new Exception("Linea "+ctx.start.getLine()+":"+ctx.expr(i).start.getCharPositionInLine()+" La comparacion solo es valida entre booleanos, se recibio:\""+r.getType()+"\"");
                     }
@@ -453,12 +455,14 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             if (!r.getType().equals("bool")){
                 throw new Exception("Linea "+ctx.start.getLine()+":"+ctx.expr(0).start.getCharPositionInLine()+" La comparacion solo es valida entre booleanos, se recibio:\""+r.getType()+"\"");
             }
+            history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
             while((boolean) r.getValue()){
                 Record block_return = visitBlock(ctx.block(0));
                 if(block_return != null){
                     return block_return;
                 }
                 r = visitExpr(ctx.expr(0));
+                history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
             }
             return null;
         }
@@ -478,6 +482,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     Record id = symbolTable.get(ctx.ID().getText());
                     id.setValue(values.charAt(i));
                     id.setType("str");
+                    history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
                     Record block_return = visitBlock(ctx.block(0));
                     if(block_return != null){
                         symbolTable.remove(ctx.ID().getText());
@@ -490,6 +495,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     Record id = symbolTable.get(ctx.ID().getText());
                     id.setType(((Record) o).getType());
                     id.setValue(((Record) o).getValue());
+                    history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
                     Record block_return = visitBlock(ctx.block(0));
                     if(block_return != null){
                         symbolTable.remove(ctx.ID().getText());
