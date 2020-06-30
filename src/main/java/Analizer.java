@@ -21,11 +21,18 @@ public class Analizer implements Route {
         PrintStream ps = new PrintStream(baos);
         System.setErr(ps);
         Gson gson = new Gson();
-
         //read file from request
         request.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("C:/tmp"));
         Part filePart = request.raw().getPart("myfile");
 
+
+        String inputString = request.queryParams("input");
+        String[] input;
+        if(inputString != null){
+            input = inputString.split("\n");
+        }else{
+            input = new String[0];
+        }
         //set up the lexer and parser
         ChocopyLexer lexer = new ChocopyLexer(CharStreams.fromStream(filePart.getInputStream()));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -34,7 +41,7 @@ public class Analizer implements Route {
 
         //visit first node of the parse tree and return the result of the analysis
         ArrayList<HistoryPoint> history = new ArrayList<>();
-        Visitor loader = new Visitor(history);
+        Visitor loader = new Visitor(history, input);
         if(baos.size() > 0){
             for (int i = 0; i < baos.toString().split("\n").length; i++) {
                 history.get(0).outputs.add(baos.toString().split("\n")[i]);

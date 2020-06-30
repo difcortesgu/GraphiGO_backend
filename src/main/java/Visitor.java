@@ -1,6 +1,7 @@
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 public class Visitor extends ChocopyBaseVisitor<Record>{
 
@@ -9,8 +10,12 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
     Hashtable<String, Hashtable<String, Record>> symbolTables;
     Hashtable<String, Record> symbolTable;
     ArrayList<String> outputs;
+    String[] input;
+    int current_input_line;
 
-    public Visitor(ArrayList<HistoryPoint> history) {
+    public Visitor(ArrayList<HistoryPoint> history, String[] input) {
+        current_input_line = 0;
+        this.input = input;
         this.history = history;
         outputs = new ArrayList<>();
         callStack = new Stack<>();
@@ -876,10 +881,14 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
         if (ctx.INPUT() !=  null){
             // INPUT ( )
-            Scanner s = new Scanner(System.in);
-            String text = s.nextLine();
+
+            if(current_input_line >= input.length){
+                throw new Exception("Linea "+ctx.start.getLine()+":"+ctx.start.getCharPositionInLine()+" El programa requiere un input y no se recibio ninguno");
+            }
+            String input_text = input[current_input_line++];
+
             history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
-            return new Record("str", text);
+            return new Record("str", input_text);
         }
 
         if (ctx.MENOS() != null){

@@ -7,7 +7,7 @@ import static spark.Spark.*;
 public class Main {
     public static void main(String[] args) {
 
-        enableCORS("*", "*", "*");
+        enableCORS();
 
         get("/hello", new Route() {
             public Object handle(Request req, Response res) throws Exception {
@@ -19,7 +19,7 @@ public class Main {
     }
 
     // Enables CORS on requests. This method is an initialization method and should be called once.
-    private static void enableCORS(final String origin, final String methods, final String headers) {
+    private static void enableCORS() {
 
         options("/*", (request, response) -> {
 
@@ -37,9 +37,9 @@ public class Main {
         });
 
         before((request, response) -> {
-            response.header("Access-Control-Allow-Origin", origin);
-            response.header("Access-Control-Request-Method", methods);
-            response.header("Access-Control-Allow-Headers", headers);
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Request-Method", "*");
+            response.header("Access-Control-Allow-Headers", "*");
             // Note: this may or may not be necessary in your particular application
             response.type("application/json");
         });
