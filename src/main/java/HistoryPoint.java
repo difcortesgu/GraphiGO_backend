@@ -21,7 +21,7 @@ public class HistoryPoint {
             this.symbolTables.put(s, hs);
             stringRecordHashtable.forEach((s1, record) -> {
                 Record r = new Record(record);
-                if(r.getType().equals("func") || r.getType().equals("class")){
+                if((r.getType().equals("func") || r.getType().equals("class")) && !s1.equals(".")){
                     r.setValue(null);
                 }
                 hs.put(s1, new Record(r));
