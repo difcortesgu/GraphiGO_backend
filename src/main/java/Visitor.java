@@ -371,10 +371,14 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             return null;
         }
         if(ctx.RETURN() != null){
+            Record r;
             if(ctx.expr() != null){
-                return visitExpr(ctx.expr());
+                r = visitExpr(ctx.expr());
+            }else{
+                r = new Record("None", "None");
             }
-            return new Record("None", "None");
+            history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
+            return r;
         }
         if(ctx.PRINT() != null){
 
