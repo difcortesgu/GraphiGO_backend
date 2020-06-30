@@ -347,17 +347,14 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             }
             if (ctx.class_def() != null) {
                 visitClass_def(ctx.class_def());
-                history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
                 return visitProgram(ctx.program());
             }
             if (ctx.var_def() != null) {
                 visitVar_def(ctx.var_def());
-                history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
                 return visitProgram(ctx.program());
             }
             if (ctx.func_def() != null) {
                 visitFunc_def(ctx.func_def());
-                history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
                 return visitProgram(ctx.program());
             }
         }catch (Exception e){
@@ -387,6 +384,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 throw new Exception("Linea "+ctx.start.getLine()+":"+ctx.expr().start.getCharPositionInLine()+" No se puede imprimir una variable de tipo \"None\"");
             }
             outputs.add(r.toString());
+            history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
             System.out.println(r.toString());
             return null;
         }
@@ -403,6 +401,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                 }
                 target.setValue(r1.getValue());
             }
+            history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
             return null;
         }
         if(ctx.expr() != null){
@@ -418,7 +417,6 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         if(ctx.simple_stmt() != null){
             //simple_stmt NEWLINE
             Record r = visitSimple_stmt(ctx.simple_stmt());
-            history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
             return r;
         }
         if(ctx.IF() != null){
@@ -792,16 +790,17 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
                     Record result = (Record) func_eval(ctx.ID().getText(), ctx.expr(), ctx.start.getLine(), ctx.start.getCharPositionInLine());
                     callStack.pop();
                     symbolTable = symbolTables.get(callStack.peek());
+                    history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
                     return result;
                 }
 
                 // SIMPLE_VALUE . ID
-
                 return getClassMember(ctx.ID(), ctx.start.getLine(), ctx.start.getCharPositionInLine());
             }
 
             if (ctx.PAR_IZQ() !=  null){
                 // ID ( EXPR ... )
+                history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
                 return func_eval(ctx.ID().getText(), ctx.expr(), ctx.start.getLine(), ctx.start.getCharPositionInLine());
             }
 
@@ -864,16 +863,18 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
             if (r.getValue().equals("None")){
                 throw new Exception("Linea "+ctx.start.getLine()+":"+ctx.expr(0).start.getCharPositionInLine()+" La expresion debe ser de tipo \"list\" o \"str\", se recibio:\""+r.getValue()+"\"");
             }
-            if (r.getType().equals("str"))
+            if (r.getType().equals("str")){
                 return new Record("int", ((String)r.getValue()).length());
-            else
+            }else{
                 return new Record("int", ((Object[])r.getValue()).length);
+            }
         }
 
         if (ctx.INPUT() !=  null){
             // INPUT ( )
             Scanner s = new Scanner(System.in);
             String text = s.nextLine();
+            history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
             return new Record("str", text);
         }
 
@@ -973,6 +974,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
         Record func = new Record("func", ctx);
         symbolTable.put(funcName, func);
+        history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
         return  null;
     }
 
@@ -999,6 +1001,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
 
         Record var = new Record((String) type.getValue(), literal.getValue());
         symbolTable.put(varName, var);
+        history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
         return  null;
     }
 
@@ -1046,6 +1049,7 @@ public class Visitor extends ChocopyBaseVisitor<Record>{
         }
         Record new_class = new Record("class", ctx);
         symbolTable.put(className, new_class);
+        history.add(new HistoryPoint(callStack, symbolTables, outputs, ctx.start.getLine()));
         return  null;
     }
 
