@@ -21,7 +21,7 @@ public class HistoryPoint {
             if((r.getType().equals("func") || r.getType().equals("class")) && !s.equals(".")){
                 r.setValue(null);
             }
-            this.symbolTable.put(s, new Record(r));
+            this.symbolTable.put(s, r);
         });
 
         this.outputs = new ArrayList<>();
