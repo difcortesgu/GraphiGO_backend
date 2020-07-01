@@ -32,8 +32,6 @@ public class Main {
             response.header("Access-Control-Allow-Origin", "*");
             response.header("Access-Control-Request-Method", "*");
             response.header("Access-Control-Allow-Headers", "*");
-            // Note: this may or may not be necessary in your particular application
-            response.type("application/json");
         });
     }
 }

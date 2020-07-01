@@ -11,6 +11,11 @@ Instrucciones para instalar (utilizando el IDE IntelliJ IDEA):
 - Marcar como sources del proyecto la carpeta AntlrGenerated
 - Ejecutar la clase Main
 
+
+Despues de ejecutar, el programa quedara escuchando en el puerto 4567.
+Para probar que funcione se puede hacer una peticion a http://localhost:4567/hello,
+la respuesta debe ser "Hello World"
+
 Nota: Al ejecutar el programa saldra el siguiente warning que se debe ignorar:
 
 SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".   
